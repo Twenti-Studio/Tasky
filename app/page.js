@@ -12,10 +12,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent animate-fade-in-up delay-100">
-            Tasky
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 animate-fade-in-up">Tasky</h1>
           <p className="text-base md:text-lg text-blue-300/90 font-medium tracking-wide animate-fade-in-up delay-150">
             Powered by Twenti Studio
           </p>

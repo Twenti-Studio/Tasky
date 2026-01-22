@@ -15,15 +15,15 @@ export default function PrivacyPage() {
             <Link href="/" className="text-blue-200 hover:text-white text-sm font-medium inline-block">
               &larr; Back to Home
             </Link>
-            <div className="bg-white p-1.5 rounded-lg shadow-md">
+            {/* <div className="bg-white p-1.5 rounded-lg shadow-md">
               <Image 
-                src="/tasky.jpeg" 
+                src="/tasky-logo.png" 
                 alt="Logo" 
                 width={40} 
                 height={40} 
                 className="rounded-md"
               />
-            </div>
+            </div> */}
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">Privacy Policy</h1>
         </div>
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-[#042C71] mb-4">4. Contact Us</h2>
           <p>
-            If you have any questions about this Privacy Policy, please contact us at support@tasky.com.
+            If you have any questions about this Privacy Policy, please contact us at twentistudio@gmail.com.
           </p>
         </section>
       </div>

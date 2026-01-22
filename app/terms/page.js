@@ -15,15 +15,15 @@ export default function TermsPage() {
             <Link href="/" className="text-blue-200 hover:text-white text-sm font-medium inline-block">
               &larr; Back to Home
             </Link>
-            <div className="bg-white p-1.5 rounded-lg shadow-md">
+            {/* <div className="bg-white p-1.5 rounded-lg shadow-md">
               <Image 
-                src="/tasky.jpeg" 
+                src="/tasky-logo.png" 
                 alt="Logo" 
                 width={40} 
                 height={40} 
                 className="rounded-md"
               />
-            </div>
+            </div> */}
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">Terms of Service</h1>
         </div>
