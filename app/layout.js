@@ -13,13 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Twenti Rewards — Coming Soon",
+  title: "Tasky — Coming Soon",
   description: "Something Big is Coming for Your Wallet. Join the most trusted micro-task platform in Indonesia.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >

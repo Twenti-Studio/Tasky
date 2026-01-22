@@ -1,5 +1,6 @@
-import WaitlistForm from "./components/WaitlistForm";
+import Image from "next/image";
 import FeatureSection from "./components/FeatureSection";
+import WaitlistForm from "./components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -11,6 +12,14 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
+          {/* Title */}
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent animate-fade-in-up delay-100">
+            Tasky
+          </h1>
+          <p className="text-base md:text-lg text-blue-300/90 font-medium tracking-wide animate-fade-in-up delay-150">
+            Powered by Twenti Studio
+          </p>
+
           <span className="inline-block py-1 px-3 rounded-full bg-blue-800/50 border border-blue-700 text-blue-200 text-sm font-medium mb-6 animate-fade-in-up">
             Coming Soon
           </span>

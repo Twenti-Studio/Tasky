@@ -1,7 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Twenti Rewards — Privacy Policy",
+  title: "Tasky — Privacy Policy",
   description: "Read our privacy policy regarding data collection and security.",
 };
 
@@ -10,9 +11,20 @@ export default function PrivacyPage() {
     <div className="bg-white min-h-screen text-gray-800">
       <div className="bg-[#042C71] py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <Link href="/" className="text-blue-200 hover:text-white text-sm font-medium mb-4 inline-block">
-            &larr; Back to Home
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/" className="text-blue-200 hover:text-white text-sm font-medium inline-block">
+              &larr; Back to Home
+            </Link>
+            <div className="bg-white p-1.5 rounded-lg shadow-md">
+              <Image 
+                src="/tasky.jpeg" 
+                alt="Logo" 
+                width={40} 
+                height={40} 
+                className="rounded-md"
+              />
+            </div>
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">Privacy Policy</h1>
         </div>
       </div>
@@ -42,7 +54,7 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-[#042C71] mb-4">4. Contact Us</h2>
           <p>
-            If you have any questions about this Privacy Policy, please contact us at support@twentistudio.com.
+            If you have any questions about this Privacy Policy, please contact us at support@tasky.com.
           </p>
         </section>
       </div>

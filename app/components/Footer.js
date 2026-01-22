@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-white border-t border-gray-200 py-12">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Twenti Studio. All rights reserved.
+          &copy; {new Date().getFullYear()} Tasky. All rights reserved.
         </div>
         
         <div className="flex gap-8">
