@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  name      String?
+  balance   Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  adImpressions AdImpression[]
+  earnings      Earning[]
+  withdrawals   Withdrawal[]
+  transactions  Transaction[]
+
+  @@map("users")
+}
+
+model AdImpression {
+  id        String   @id @default(uuid())
+  userId    String
+  adType    String   // "monetag", "cpx", "bitlabs"
+  adFormat  String   // "push", "popunder", "native", "survey", etc
+  revenue   Float    @default(0)
+  status    String   @default("pending") // "pending", "completed", "failed"
+  metadata  String?  // JSON string untuk data tambahan
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ad_impressions")
+  @@index([userId])
+}
+
+model Earning {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Float
+  source      String   // "monetag", "cpx", "bitlabs"
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("earnings")
+  @@index([userId])
+}
+
+model Withdrawal {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Float
+  method        String   // "gopay", "ovo", "dana", "bank"
+  accountNumber String
+  accountName   String
+  status        String   @default("pending") // "pending", "processing", "completed", "rejected"
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("withdrawals")
+  @@index([userId])
+}
+
+// Transaction model for idempotency and audit trail
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String
+  amount          Float    // Points credited/debited
+  provider        String   // "cpx", "monetag", "bitlabs", "timewall"
+  externalTransId String   // trans_id from provider (for idempotency)
+  status          String   // "success", "chargeback", "pending", "failed"
+  taskType        String?  // "survey", "smartlink", "push", "popunder", etc
+  metadata        String?  // JSON string for additional data (country, IP, etc)
+  createdAt       DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+  @@unique([provider, externalTransId]) // Prevent duplicate transactions
+  @@index([userId])
+  @@index([externalTransId])
+}
+
+// Provider reward configuration (flat rates)
+model ProviderConfig {
+  id          String   @id @default(uuid())
+  provider    String   @unique // "monetag", "cpx", "bitlabs"
+  taskType    String   // "push", "smartlink", "popunder", "survey"
+  rewardFixed Float    // Fixed reward in points (e.g., 50 for Monetag SmartLink)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("provider_configs")
+  @@unique([provider, taskType])
+}

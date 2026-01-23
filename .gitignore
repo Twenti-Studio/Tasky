@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+!.env.docker
 
 # vercel
 .vercel
@@ -39,3 +41,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# server
+/server/node_modules
+/server/.env
+/server/dev.db
+/server/dev.db-journal
+/server/dist
+
+# docker
+postgres_data/
+postgres_data_prod/
+*.sql

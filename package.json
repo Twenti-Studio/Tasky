@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "server:dev": "cd server && npm run dev",
+    "server:setup": "cd server && npm install && npm run prisma:generate && npm run prisma:migrate",
+    "setup": "npm install && npm run server:setup",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "docker:rebuild": "docker-compose up --build -d",
+    "docker:studio": "docker-compose --profile studio up"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",

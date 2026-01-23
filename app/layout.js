@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import { AuthProvider } from "./context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,23 +15,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Tasky — Coming Soon",
-  description: "Something Big is Coming for Your Wallet. Join the most trusted micro-task platform in Indonesia.",
+  title: "Tasky — Earn Points with Micro Tasks",
+  description: "Join the most trusted micro-task platform in Indonesia. Earn points by completing simple tasks and convert them to cash!",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <script src="https://quge5.com/88/tag.min.js" data-zone="204631" async data-cfasync="false"></script>
-      </head>
+      <head />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gray-50`}
       >
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

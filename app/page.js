@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Link from "next/link";
 import FeatureSection from "./components/FeatureSection";
 import WaitlistForm from "./components/WaitlistForm";
 
@@ -11,24 +11,53 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-800/20 skew-x-12 transform translate-x-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
+        {/* Top Navigation */}
+        <div className="absolute top-4 right-4 z-20">
+          <div className="flex gap-3">
+            <Link 
+              href="/login"
+              className="px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg font-medium transition"
+            >
+              Login
+            </Link>
+            <Link 
+              href="/register"
+              className="px-6 py-2 bg-[#CE4912] hover:bg-orange-600 rounded-lg font-medium transition"
+            >
+              Register
+            </Link>
+          </div>
+        </div>
+
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 animate-fade-in-up">Tasky</h1>
           <p className="text-base md:text-lg text-blue-300/90 font-medium tracking-wide animate-fade-in-up delay-150">
             Powered by Twenti Studio
           </p>
 
-          <span className="inline-block py-1 px-3 rounded-full bg-blue-800/50 border border-blue-700 text-blue-200 text-sm font-medium mb-6 animate-fade-in-up">
-            Coming Soon
+          <span className="inline-block py-1 px-3 rounded-full bg-green-600/80 border border-green-500 text-white text-sm font-medium mb-6 animate-fade-in-up">
+            Now Live! 🎉
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight animate-fade-in-up delay-100">
-            Something Big is Coming for Your Wallet
+            Earn Money with Simple Tasks
           </h1>
           <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-200">
-            Join the most trusted micro-task platform in Indonesia. Earn rewards by completing simple tasks, high-paying surveys, and watching videos.
+            Join the most trusted micro-task platform in Indonesia. Earn rewards by completing simple tasks, surveys, and watching ads.
           </p>
           
-          <div className="flex justify-center animate-fade-in-up delay-300">
-            <WaitlistForm />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
+            <Link 
+              href="/register"
+              className="px-8 py-4 bg-[#CE4912] hover:bg-orange-600 rounded-lg font-bold text-lg transition shadow-lg"
+            >
+              Get Started Now
+            </Link>
+            <Link 
+              href="/login"
+              className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg font-bold text-lg transition"
+            >
+              Login to Dashboard
+            </Link>
           </div>
         </div>
       </section>
