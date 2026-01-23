@@ -20,7 +20,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head />
+      <head>
+        <script src="https://quge5.com/88/tag.min.js" data-zone="204631" async data-cfasync="false"></script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
