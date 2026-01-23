@@ -10,8 +10,8 @@
  */
 
 // Revenue share percentages
-const PLATFORM_SHARE = 0.30; // 30%
-const USER_SHARE = 0.70;     // 70%
+const PLATFORM_SHARE = 0.30;
+const USER_SHARE = 0.70;
 
 // Conversion rates (1 USD = X Points)
 const CONVERSION_RATES = {
