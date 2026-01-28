@@ -1,20 +1,31 @@
-import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import dotenv from 'dotenv';
+import express from 'express';
 import authRoutes from './routes/auth.js';
-import userRoutes from './routes/user.js';
-import monetagRoutes from './routes/monetag.js';
 import callbackRoutes from './routes/callback.js';
+import monetagRoutes from './routes/monetag.js';
+import userRoutes from './routes/user.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'https://tasky7.vercel.app'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000' || 'https://tasky7.vercel.app',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
