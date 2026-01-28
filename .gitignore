@@ -52,4 +52,5 @@ next-env.d.ts
 # docker
 postgres_data/
 postgres_data_prod/
-*.sql
+# *.sql - Commented out to allow Prisma migrations
+!server/prisma/migrations/**/*.sql

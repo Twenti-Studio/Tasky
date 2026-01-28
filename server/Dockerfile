@@ -11,6 +11,7 @@ COPY prisma ./prisma/
 
 # Install dependencies
 RUN npm ci
+RUN npm install -g npm@11.8.0
 
 # Generate Prisma Client
 RUN npx prisma generate
