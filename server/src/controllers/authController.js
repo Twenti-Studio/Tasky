@@ -13,7 +13,7 @@ const generateToken = (userId) => {
   );
 };
 
-// Register new user
+// Register new user again
 export const register = async (req, res) => {
   try {
     const { email, username, password, name } = req.body;
