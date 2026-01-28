@@ -5,7 +5,7 @@
     "buildCommand": "npm ci && npx prisma generate"
   },
   "deploy": {
-    "startCommand": "(npx prisma migrate deploy || npx prisma db push) && npm start",
+    "startCommand": "npx prisma db push && npm start",
     "restartPolicyType": "ON_FAILURE",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300
