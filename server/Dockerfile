@@ -59,4 +59,4 @@ COPY --from=builder /app/package*.json ./
 EXPOSE 5000
 
 # Start production server
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npx prisma db push && npm start"]
