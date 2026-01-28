@@ -1,10 +1,10 @@
 {
-    "build": {
-      "builder": "NIXPACKS",
-      "buildCommand": "npm install && npx prisma generate"
-    },
-    "deploy": {
-      "startCommand": "npx prisma migrate deploy && npm start",
-      "restartPolicyType": "ON_FAILURE"
-    }
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install && npx prisma generate"
+  },
+  "deploy": {
+    "startCommand": "node -e \"const net=require('net');const {URL}=require('url');if(!process.env.DATABASE_URL){console.error('DATABASE_URL is missing');process.exit(1);}const u=new URL(process.env.DATABASE_URL);const host=u.hostname;const port=Number(u.port||5432);const max=60;const delay=2000;const once=()=>new Promise((res,rej)=>{const s=net.connect({host,port});s.setTimeout(2000);s.on('connect',()=>{s.end();res();});s.on('timeout',()=>{s.destroy();rej(new Error('timeout'));});s.on('error',rej);});(async()=>{for(let i=0;i<max;i++){try{await once();console.log('DB reachable:',host+':'+port);process.exit(0);}catch(e){console.log('Waiting for DB...',host+':'+port,'attempt',i+1+'/'+max);await new Promise(r=>setTimeout(r,delay));}}console.error('DB not reachable:',host+':'+port);process.exit(1);})();\" && npx prisma db push && npm start",
+    "restartPolicyType": "ON_FAILURE"
   }
+}
