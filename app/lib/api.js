@@ -1,6 +1,6 @@
 // API client for backend communication
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api' || 'https://tasky-production-9187.up.railway.app/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tasky-production-c3a6.up.railway.app/api';
 
 class ApiClient {
   constructor() {
