@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { ArrowDownLeft, ArrowUpRight, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { Clock, ArrowUpRight, ArrowDownLeft, Filter } from 'lucide-react';
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -15,10 +15,14 @@ export default function HistoryPage() {
   const [activeTab, setActiveTab] = useState('earnings');
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    } else if (user) {
-      fetchHistory();
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.isAdmin) {
+        router.push('/admin');
+      } else {
+        fetchHistory();
+      }
     }
   }, [user, authLoading, router]);
 
@@ -87,21 +91,19 @@ export default function HistoryPage() {
         <div className="flex bg-white border border-gray-200 rounded-xl p-1 mb-6">
           <button
             onClick={() => setActiveTab('earnings')}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${
-              activeTab === 'earnings'
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${activeTab === 'earnings'
                 ? 'bg-[#042C71] text-white'
                 : 'text-gray-600 hover:bg-gray-100'
-            }`}
+              }`}
           >
             Earnings
           </button>
           <button
             onClick={() => setActiveTab('withdrawals')}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${
-              activeTab === 'withdrawals'
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${activeTab === 'withdrawals'
                 ? 'bg-[#042C71] text-white'
                 : 'text-gray-600 hover:bg-gray-100'
-            }`}
+              }`}
           >
             Withdrawals
           </button>

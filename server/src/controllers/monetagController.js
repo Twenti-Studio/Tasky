@@ -151,6 +151,110 @@ const getImpressions = async (req, res) => {
 };
 
 /**
+ * Complete task and credit points immediately
+ * This is called when user clicks on a task button
+ */
+const completeTask = async (req, res) => {
+  try {
+    const { provider, taskType, points } = req.body;
+
+    if (!taskType) {
+      return res.status(400).json({ error: 'Task type is required' });
+    }
+
+    const userId = req.user.id;
+
+    // Generate unique transaction ID for this completion
+    const transactionId = `${provider || 'monetag'}-${taskType}-${userId}-${Date.now()}`;
+
+    // Check if user already completed this task recently (within 5 minutes)
+    const recentTask = await prisma.transaction.findFirst({
+      where: {
+        userId,
+        provider: provider || 'monetag',
+        taskType,
+        createdAt: {
+          gte: new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
+        }
+      }
+    });
+
+    if (recentTask) {
+      return res.status(400).json({
+        error: 'You already completed this task recently. Please wait a few minutes.',
+        success: false
+      });
+    }
+
+    // Get reward points
+    const rewardPoints = points || getMontagReward(taskType);
+
+    // Use transaction to ensure atomicity
+    await prisma.$transaction(async (tx) => {
+      // Create Transaction record
+      await tx.transaction.create({
+        data: {
+          userId,
+          amount: rewardPoints,
+          provider: provider || 'monetag',
+          externalTransId: transactionId,
+          status: 'success',
+          taskType,
+          metadata: JSON.stringify({
+            source: 'direct_completion',
+            timestamp: new Date().toISOString()
+          })
+        }
+      });
+
+      // Create Earning record
+      await tx.earning.create({
+        data: {
+          userId,
+          amount: rewardPoints,
+          source: provider || 'monetag',
+          description: `${provider || 'Monetag'} ${taskType} completed (+${rewardPoints} pts)`
+        }
+      });
+
+      // Update user balance
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          balance: { increment: rewardPoints }
+        }
+      });
+
+      // Create AdImpression record
+      await tx.adImpression.create({
+        data: {
+          userId,
+          adType: provider || 'monetag',
+          adFormat: taskType,
+          revenue: rewardPoints,
+          status: 'completed',
+          metadata: JSON.stringify({
+            source: 'direct_completion',
+            timestamp: new Date().toISOString()
+          })
+        }
+      });
+    });
+
+    console.log(`[Task Complete] User ${userId} earned ${rewardPoints} points from ${taskType}`);
+
+    res.json({
+      success: true,
+      message: 'Task completed successfully',
+      earned: rewardPoints
+    });
+  } catch (error) {
+    console.error('[Complete Task] Error:', error);
+    res.status(500).json({ error: 'Failed to complete task', success: false });
+  }
+};
+
+/**
  * Monetag Server-to-Server Postback Endpoint
  * 
  * This handles reward notifications from Monetag
@@ -168,8 +272,8 @@ const monetagCallback = async (req, res) => {
   try {
     // Support both GET and POST
     const params = { ...req.query, ...req.body };
-    
-    const { 
+
+    const {
       subid,           // User ID
       amount,          // Revenue amount
       currency,        // Currency code
@@ -302,8 +406,9 @@ const monetagCallback = async (req, res) => {
 };
 
 export {
-  trackImpression,
   completeImpression,
+  completeTask,
   getImpressions,
-  monetagCallback,
+  monetagCallback, trackImpression
 };
+

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Tasky — Privacy Policy",
+  title: "Mita — Privacy Policy",
   description: "Read our privacy policy regarding data collection and security.",
 };
 

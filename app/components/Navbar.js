@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { Briefcase, History, Home, LogOut, Menu, Settings, Shield, User, Wallet, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Menu, X, Home, Briefcase, Wallet, History, User } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -18,8 +18,9 @@ export default function Navbar() {
     router.push('/');
   };
 
-  // Don't show navbar on landing, login, register pages
-  if (!user || pathname === '/' || pathname === '/login' || pathname === '/register') {
+  // Don't show navbar on landing, login, register, or admin pages
+  // Admin pages have their own layout with sidebar
+  if (!user || pathname === '/' || pathname === '/login' || pathname === '/register' || pathname?.startsWith('/admin')) {
     return null;
   }
 
@@ -27,12 +28,22 @@ export default function Navbar() {
     return new Intl.NumberFormat('id-ID').format(Math.floor(points || 0));
   };
 
-  const navLinks = [
-    { href: '/dashboard', label: 'Home', icon: Home },
-    { href: '/tasks', label: 'Earn', icon: Briefcase },
-    { href: '/withdraw', label: 'Withdraw', icon: Wallet },
-    { href: '/history', label: 'History', icon: History },
-  ];
+  // Different navigation for admin vs regular users
+  const navLinks = user?.isAdmin
+    ? [
+      // Admin only sees admin panel
+      { href: '/admin', label: 'Dashboard', icon: Shield },
+      { href: '/admin/users', label: 'Users', icon: User },
+      { href: '/admin/withdrawals', label: 'Payouts', icon: Wallet },
+    ]
+    : [
+      // Regular users see earning features
+      { href: '/dashboard', label: 'Home', icon: Home },
+      { href: '/tasks', label: 'Earn', icon: Briefcase },
+      { href: '/withdraw', label: 'Withdraw', icon: Wallet },
+      { href: '/history', label: 'History', icon: History },
+      { href: '/settings', label: 'Settings', icon: Settings },
+    ];
 
   const isActive = (href) => pathname === href;
 
@@ -42,14 +53,14 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-14">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2">
-            <Image 
-              src="/icon.png" 
-              alt="Tasky" 
-              width={32} 
+            <Image
+              src="/icon.png"
+              alt="Mita Logo"
+              width={32}
               height={32}
               className="rounded-lg"
             />
-            <span className="text-lg font-bold text-[#042C71] hidden sm:block">Tasky</span>
+            <span className="text-lg font-bold text-[#042C71] hidden sm:block">Mita</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -60,11 +71,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    isActive(link.href)
-                      ? 'bg-[#042C71] text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${isActive(link.href)
+                    ? 'bg-[#042C71] text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                    }`}
                 >
                   <Icon size={16} />
                   {link.label}
@@ -125,11 +135,10 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                    isActive(link.href)
-                      ? 'bg-[#042C71] text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${isActive(link.href)
+                    ? 'bg-[#042C71] text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   <Icon size={18} />
                   {link.label}

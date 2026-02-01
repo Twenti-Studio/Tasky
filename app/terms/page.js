@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Tasky — Terms of Service",
+  title: "Mita — Terms of Service",
   description: "Read our terms of service regarding account usage and payments.",
 };
 

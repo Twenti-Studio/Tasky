@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -24,9 +24,16 @@ export const authenticate = async (req, res, next) => {
         username: true,
         name: true,
         balance: true,
+        isAdmin: true,
+        isActive: true,
         createdAt: true
       }
     });
+
+    // Check if user account is active
+    if (user && !user.isActive) {
+      return res.status(403).json({ error: 'Account is disabled' });
+    }
 
     if (!user) {
       return res.status(401).json({ error: 'User not found' });

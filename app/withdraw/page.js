@@ -1,43 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { AlertCircle, Calendar, CheckCircle, Info, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { Wallet, AlertCircle, CheckCircle, Info } from 'lucide-react';
 
 export default function WithdrawPage() {
   const router = useRouter();
   const { user, loading: authLoading, refreshUser } = useAuth();
   const [amount, setAmount] = useState('');
-  const [method, setMethod] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [accountName, setAccountName] = useState('');
+  const [bankMethod, setBankMethod] = useState('dana'); // Default to DANA
+  const [danaNumber, setDanaNumber] = useState('');
+  const [danaName, setDanaName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.isAdmin) {
+        router.push('/admin');
+      }
     }
   }, [user, authLoading, router]);
 
   const formatPoints = (points) => {
     return new Intl.NumberFormat('id-ID').format(Math.floor(points || 0));
   };
-
-  const formatRupiah = (points) => {
-    return new Intl.NumberFormat('id-ID').format(Math.floor(points || 0));
-  };
-
-  const paymentMethods = [
-    { id: 'gopay', name: 'GoPay', icon: '💚' },
-    { id: 'ovo', name: 'OVO', icon: '💜' },
-    { id: 'dana', name: 'DANA', icon: '💙' },
-    { id: 'shopeepay', name: 'ShopeePay', icon: '🧡' },
-    { id: 'bank', name: 'Bank Transfer', icon: '🏦' },
-  ];
 
   const quickAmounts = [5000, 10000, 25000, 50000];
 
@@ -58,24 +50,30 @@ export default function WithdrawPage() {
       return;
     }
 
-    if (!method) {
-      setError('Please select a payment method');
+    if (!danaNumber) {
+      setError('Please enter your DANA phone number');
       return;
     }
 
-    if (!accountNumber || !accountName) {
-      setError('Please fill in account details');
+    if (!danaName) {
+      setError('Please enter your DANA account name');
+      return;
+    }
+
+    // Validate phone number format
+    if (!/^(08|628)[0-9]{8,12}$/.test(danaNumber.replace(/\s/g, ''))) {
+      setError('Please enter a valid Indonesian phone number');
       return;
     }
 
     setLoading(true);
 
     try {
-      await api.requestWithdrawal(withdrawAmount, method, accountNumber, accountName);
+      await api.requestWithdrawal(withdrawAmount, bankMethod, danaNumber, danaName);
       setSuccess(true);
       setAmount('');
-      setAccountNumber('');
-      setAccountName('');
+      setDanaNumber('');
+      setDanaName('');
       await refreshUser();
     } catch (err) {
       setError(err.message || 'Failed to process withdrawal');
@@ -100,7 +98,7 @@ export default function WithdrawPage() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-800">Withdraw</h1>
-          <p className="text-sm text-gray-500">Cash out your points</p>
+          <p className="text-sm text-gray-500">Cash out your points to DANA</p>
         </div>
 
         {/* Balance Card */}
@@ -108,23 +106,34 @@ export default function WithdrawPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Available Balance</p>
-              <p className="text-2xl font-bold text-[#042C71]">{formatPoints(user?.balance || 0)} pts</p>
+              <p className="text-2xl font-bold text-[#042C71]">{formatPoints(user?.balance || 0)} <span className="text-lg font-normal">pts</span></p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Equivalent</p>
-              <p className="text-lg font-semibold text-gray-800">Rp {formatRupiah(user?.balance || 0)}</p>
+            <div className="w-12 h-12 bg-[#042C71]/10 rounded-full flex items-center justify-center">
+              <Wallet className="text-[#042C71]" size={24} />
             </div>
           </div>
         </div>
 
         {/* Conversion Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
           <div className="flex gap-3">
             <Info className="text-blue-600 flex-shrink-0" size={20} />
             <div className="text-sm text-blue-800">
               <p className="font-semibold mb-1">Conversion Rate</p>
               <p>1,000 Points = Rp 1,000</p>
-              <p className="mt-1">Minimum Withdrawal: 5,000 Points (Rp 5,000)</p>
+              <p className="mt-1">Minimum Withdrawal: 5,000 Points</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Processing Schedule Notice */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+          <div className="flex gap-3">
+            <Calendar className="text-amber-600 flex-shrink-0" size={20} />
+            <div className="text-sm text-amber-800">
+              <p className="font-semibold mb-1">Jadwal Pencairan</p>
+              <p>Penarikan diproses setiap <strong>akhir bulan</strong> secara serentak.</p>
+              <p className="mt-1 text-xs">Request yang masuk sebelum tanggal 25 akan diproses pada akhir bulan yang sama.</p>
             </div>
           </div>
         </div>
@@ -146,7 +155,7 @@ export default function WithdrawPage() {
             <CheckCircle className="text-green-600 mx-auto mb-3" size={48} />
             <h3 className="font-semibold text-green-900 mb-2">Withdrawal Requested!</h3>
             <p className="text-sm text-green-700">
-              Your withdrawal request has been submitted. It will be processed within 1-3 business days.
+              Your withdrawal request has been submitted. It will be processed at the end of the month.
             </p>
           </div>
         ) : (
@@ -160,16 +169,16 @@ export default function WithdrawPage() {
             {/* Amount */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount (Points)
+                Jumlah Penarikan (Points)
               </label>
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
+                placeholder="Masukkan jumlah points"
                 min="5000"
                 max={user?.balance || 0}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
               />
               <div className="flex gap-2 mt-3">
                 {quickAmounts.map((amt) => (
@@ -178,11 +187,12 @@ export default function WithdrawPage() {
                     type="button"
                     onClick={() => setAmount(amt.toString())}
                     disabled={amt > (user?.balance || 0)}
-                    className={`flex-1 py-2 text-sm rounded-lg border transition ${
-                      amt > (user?.balance || 0)
-                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                    className={`flex-1 py-2 text-sm rounded-lg border transition ${amt > (user?.balance || 0)
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      : amount === amt.toString()
+                        ? 'border-[#042C71] bg-blue-50 text-[#042C71]'
                         : 'border-gray-200 hover:border-[#042C71] hover:bg-blue-50'
-                    }`}
+                      }`}
                   >
                     {formatPoints(amt)}
                   </button>
@@ -190,54 +200,73 @@ export default function WithdrawPage() {
               </div>
               {amount && (
                 <p className="text-sm text-gray-500 mt-2">
-                  = Rp {formatRupiah(amount)}
+                  = Rp {formatPoints(amount)}
                 </p>
               )}
             </div>
 
-            {/* Payment Method */}
+            {/* DANA Payment */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Payment Method
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {paymentMethods.map((pm) => (
-                  <button
-                    key={pm.id}
-                    type="button"
-                    onClick={() => setMethod(pm.id)}
-                    className={`p-3 border rounded-lg text-left transition ${
-                      method === pm.id
-                        ? 'border-[#042C71] bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="text-lg mr-2">{pm.icon}</span>
-                    <span className="text-sm font-medium">{pm.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+              <h3 className="font-semibold text-gray-800 mb-4">Metode Penarikan</h3>
 
-            {/* Account Details */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-              <label className="block text-sm font-medium text-gray-700">
-                Account Details
-              </label>
-              <input
-                type="text"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-                placeholder={method === 'bank' ? 'Bank Account Number' : 'Phone Number'}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
-              />
-              <input
-                type="text"
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                placeholder="Account Holder Name"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
-              />
+              {/* Bank Method Dropdown */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pilih Bank/E-Wallet
+                </label>
+                <select
+                  value={bankMethod}
+                  onChange={(e) => setBankMethod(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
+                >
+                  <option value="dana">DANA</option>
+                  {/* Future banks can be added here */}
+                </select>
+              </div>
+
+              {/* DANA Details */}
+              {bankMethod === 'dana' && (
+                <>
+                  <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg mb-4">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">DANA</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">DANA E-Wallet</p>
+                      <p className="text-xs text-gray-500">Transfer ke akun DANA</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nomor Telepon DANA *
+                      </label>
+                      <input
+                        type="tel"
+                        value={danaNumber}
+                        onChange={(e) => setDanaNumber(e.target.value)}
+                        placeholder="08xxxxxxxxxx"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Nomor yang terdaftar di DANA</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nama Pemilik Akun DANA *
+                      </label>
+                      <input
+                        type="text"
+                        value={danaName}
+                        onChange={(e) => setDanaName(e.target.value)}
+                        placeholder="Nama sesuai akun DANA"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Sesuai dengan nama di akun DANA Anda</p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Submit */}

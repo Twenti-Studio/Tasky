@@ -1,29 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import {
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Coins,
+  FileText,
+  Gift,
+  Star,
+  Zap
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { 
-  Bell, 
-  ExternalLink, 
-  FileText, 
-  Gift, 
-  ChevronRight,
-  Star,
-  Zap,
-  Clock,
-  DollarSign
-} from 'lucide-react';
 
 export default function TasksPage() {
   const router = useRouter();
   const { user, loading: authLoading, refreshUser } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [completedTasks, setCompletedTasks] = useState(new Set());
+  const [processingTask, setProcessingTask] = useState(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.isAdmin) {
+        router.push('/admin');
+      }
     }
   }, [user, authLoading, router]);
 
@@ -35,7 +40,7 @@ export default function TasksPage() {
     );
   }
 
-  // Offerwall providers data
+  // Offerwall providers data - only points, no currency
   const providers = [
     {
       id: 'monetag',
@@ -50,22 +55,22 @@ export default function TasksPage() {
           id: 'push',
           name: 'Push Notification',
           description: 'Enable notifications',
-          points: '~10 pts',
-          action: () => handlePushNotification(),
+          points: 10,
+          pointsDisplay: '~10 pts',
         },
         {
           id: 'smartlink',
           name: 'Direct Link',
           description: 'Visit sponsored page',
-          points: '~49 pts',
-          action: () => handleDirectLink(),
+          points: 49,
+          pointsDisplay: '~49 pts',
         },
         {
           id: 'popunder',
           name: 'Pop Ad',
           description: 'View ad content',
-          points: '~31 pts',
-          action: () => handlePopunder(),
+          points: 31,
+          pointsDisplay: '~31 pts',
         },
       ],
     },
@@ -76,14 +81,15 @@ export default function TasksPage() {
       icon: FileText,
       color: 'bg-purple-500',
       description: 'Premium surveys',
-      payout: '$0.20 - $5.00',
+      payout: '200-5000 pts',
       tasks: [
         {
           id: 'survey',
           name: 'Surveys',
           description: 'Complete market research',
-          points: 'High rewards',
-          action: () => openOfferwall('cpx'),
+          points: 0, // Variable, handled by callback
+          pointsDisplay: 'High rewards',
+          isOfferwall: true,
         },
       ],
     },
@@ -94,14 +100,15 @@ export default function TasksPage() {
       icon: Star,
       color: 'bg-orange-500',
       description: 'Surveys & offers',
-      payout: '$0.20 - $3.00',
+      payout: '200-3000 pts',
       tasks: [
         {
           id: 'offerwall',
           name: 'Offerwall',
           description: 'Surveys and app offers',
-          points: 'Varies',
-          action: () => openOfferwall('bitlabs'),
+          points: 0,
+          pointsDisplay: 'Varies',
+          isOfferwall: true,
         },
       ],
     },
@@ -112,14 +119,15 @@ export default function TasksPage() {
       icon: Clock,
       color: 'bg-green-500',
       description: 'Micro tasks',
-      payout: '$0.05 - $0.50',
+      payout: '50-500 pts',
       tasks: [
         {
           id: 'microtask',
           name: 'Micro Tasks',
           description: 'Web visits, follows, signups',
-          points: 'Medium rewards',
-          action: () => openOfferwall('timewall'),
+          points: 0,
+          pointsDisplay: 'Medium rewards',
+          isOfferwall: true,
         },
       ],
     },
@@ -130,14 +138,15 @@ export default function TasksPage() {
       icon: Gift,
       color: 'bg-pink-500',
       description: 'Video & offers',
-      payout: '$0.10 - $1.00',
+      payout: '100-1000 pts',
       tasks: [
         {
           id: 'offers',
           name: 'Offers',
           description: 'Videos, surveys, offers',
-          points: 'Varies',
-          action: () => openOfferwall('lootably'),
+          points: 0,
+          pointsDisplay: 'Varies',
+          isOfferwall: true,
         },
       ],
     },
@@ -145,17 +154,18 @@ export default function TasksPage() {
       id: 'revlum',
       name: 'Revlum',
       category: 'offers',
-      icon: DollarSign,
+      icon: Coins,
       color: 'bg-teal-500',
       description: 'Multi-task platform',
-      payout: '$0.50 - $10.00',
+      payout: '500-10000 pts',
       tasks: [
         {
           id: 'multitask',
           name: 'Multi Tasks',
           description: 'Surveys, quizzes, app installs',
-          points: 'High rewards',
-          action: () => openOfferwall('revlum'),
+          points: 0,
+          pointsDisplay: 'High rewards',
+          isOfferwall: true,
         },
       ],
     },
@@ -169,48 +179,81 @@ export default function TasksPage() {
     { id: 'offers', label: 'Offers' },
   ];
 
-  const filteredProviders = activeCategory === 'all' 
-    ? providers 
+  const filteredProviders = activeCategory === 'all'
+    ? providers
     : providers.filter(p => p.category === activeCategory);
 
-  // Monetag handlers
-  const handlePushNotification = async () => {
+  // Handle task completion with points crediting
+  const handleTask = async (provider, task) => {
+    const taskKey = `${provider.id}-${task.id}`;
+
+    if (processingTask) return; // Prevent double-click
+
+    setProcessingTask(taskKey);
+
+    try {
+      if (task.isOfferwall) {
+        // Open offerwall (points credited via server callback)
+        openOfferwall(provider.id);
+      } else {
+        // For Monetag direct tasks - credit points immediately
+        if (task.id === 'push') {
+          await handlePushNotification(provider, task);
+        } else {
+          // Track and complete the task (smartlink and popunder)
+          console.log(`[Task] Starting task: ${task.id} with ${task.points} points`);
+
+          const result = await api.completeTask(provider.id, task.id, task.points);
+
+          if (result.success) {
+            console.log(`[Task] Success! Earned ${result.earned} points`);
+            setCompletedTasks(prev => new Set([...prev, taskKey]));
+            await refreshUser();
+
+            // Show success notification
+            alert(`🎉 Task completed! +${result.earned} points earned!`);
+
+            // Open the ad link
+            const monetagUrl = `https://otieu.com/4/10505263?subid=${user.id}&type=${task.id}`;
+            window.open(monetagUrl, '_blank');
+          } else {
+            console.error('[Task] Failed - no success in result');
+            alert('Task completion failed. Please try again.');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Task error:', error);
+      alert(error.message || 'Failed to complete task');
+    } finally {
+      setProcessingTask(null);
+    }
+  };
+
+  // Handle push notification task
+  const handlePushNotification = async (provider, task) => {
     try {
       if ('Notification' in window) {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          await trackTask('monetag', 'push');
-          alert('Push notification enabled! Points will be credited.');
+          const result = await api.completeTask(provider.id, task.id, task.points);
+          if (result.success) {
+            setCompletedTasks(prev => new Set([...prev, `${provider.id}-${task.id}`]));
+            await refreshUser();
+            alert(`🎉 Task completed! +${task.points} points earned!`);
+          }
+        } else {
+          alert('Please enable notifications to complete this task');
         }
+      } else {
+        alert('Notifications not supported in this browser');
       }
     } catch (error) {
       console.error('Push notification error:', error);
     }
   };
 
-  const handleDirectLink = () => {
-    const monetagUrl = `https://otieu.com/4/10505263?subid=${user.id}`;
-    trackTask('monetag', 'smartlink');
-    window.open(monetagUrl, '_blank');
-  };
-
-  const handlePopunder = () => {
-    const monetagUrl = `https://otieu.com/4/10505263?subid=${user.id}`;
-    trackTask('monetag', 'popunder');
-    window.open(monetagUrl, '_blank');
-  };
-
-  const trackTask = async (provider, taskType) => {
-    try {
-      await api.trackImpression(taskType, { provider });
-    } catch (error) {
-      console.error('Track error:', error);
-    }
-  };
-
   const openOfferwall = (provider) => {
-    // Open offerwall in new window/iframe
-    // You'll need to get the actual URLs from each provider's dashboard
     const urls = {
       cpx: `https://offers.cpx-research.com/index.php?app_id=${process.env.NEXT_PUBLIC_CPX_APP_ID || 'YOUR_CPX_APP_ID'}&ext_user_id=${user.id}`,
       bitlabs: `https://web.bitlabs.ai/?token=${process.env.NEXT_PUBLIC_BITLABS_TOKEN || 'YOUR_BITLABS_TOKEN'}&uid=${user.id}`,
@@ -218,7 +261,7 @@ export default function TasksPage() {
       lootably: `https://wall.lootably.com/?placementID=${process.env.NEXT_PUBLIC_LOOTABLY_PLACEMENT_ID || 'YOUR_LOOTABLY_PLACEMENT_ID'}&userID=${user.id}`,
       revlum: `https://revlum.com/offerwall/${process.env.NEXT_PUBLIC_REVLUM_APP_ID || 'YOUR_REVLUM_APP_ID'}?user_id=${user.id}`,
     };
-    
+
     if (urls[provider]) {
       window.open(urls[provider], '_blank', 'width=800,height=600');
     } else {
@@ -241,11 +284,10 @@ export default function TasksPage() {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-                activeCategory === cat.id
-                  ? 'bg-[#042C71] text-white'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-[#042C71]'
-              }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${activeCategory === cat.id
+                ? 'bg-[#042C71] text-white'
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-[#042C71]'
+                }`}
             >
               {cat.label}
             </button>
@@ -255,8 +297,8 @@ export default function TasksPage() {
         {/* Info Banner */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
           <p className="text-sm text-blue-800">
-            <span className="font-semibold">💡 Tip:</span> You receive 70% of all earnings. 
-            Points are credited automatically after task completion.
+            <span className="font-semibold">💡 Tip:</span> Points are credited after task completion.
+            For offerwalls, points arrive via provider callback.
           </p>
         </div>
 
@@ -287,22 +329,45 @@ export default function TasksPage() {
 
                 {/* Tasks */}
                 <div className="divide-y divide-gray-100">
-                  {provider.tasks.map((task) => (
-                    <button
-                      key={task.id}
-                      onClick={task.action}
-                      className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition text-left"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-800">{task.name}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{task.description}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[#042C71]">{task.points}</span>
-                        <ChevronRight size={16} className="text-gray-400" />
-                      </div>
-                    </button>
-                  ))}
+                  {provider.tasks.map((task) => {
+                    const taskKey = `${provider.id}-${task.id}`;
+                    const isCompleted = completedTasks.has(taskKey);
+                    const isProcessing = processingTask === taskKey;
+
+                    return (
+                      <button
+                        key={task.id}
+                        onClick={() => handleTask(provider, task)}
+                        disabled={isCompleted || isProcessing}
+                        className={`w-full p-4 flex items-center justify-between transition text-left ${isCompleted
+                          ? 'bg-green-50'
+                          : isProcessing
+                            ? 'bg-gray-50 cursor-wait'
+                            : 'hover:bg-gray-50'
+                          }`}
+                      >
+                        <div>
+                          <p className="font-medium text-gray-800">{task.name}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{task.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isCompleted ? (
+                            <span className="flex items-center gap-1 text-sm text-green-600">
+                              <CheckCircle size={16} />
+                              Done
+                            </span>
+                          ) : isProcessing ? (
+                            <span className="text-sm text-gray-500">Processing...</span>
+                          ) : (
+                            <>
+                              <span className="text-sm font-semibold text-[#042C71]">{task.pointsDisplay}</span>
+                              <ChevronRight size={16} className="text-gray-400" />
+                            </>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -314,7 +379,7 @@ export default function TasksPage() {
           <p className="text-xs text-gray-500">
             Points are credited after provider confirms task completion.
             <br />
-            Minimum withdrawal: 5,000 points (Rp 5,000)
+            Minimum withdrawal: 5,000 points
           </p>
         </div>
       </div>

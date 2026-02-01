@@ -44,8 +44,13 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(formData);
-      router.push('/dashboard');
+      const result = await login(formData);
+      // Redirect admin to admin panel, regular users to dashboard
+      if (result.user?.isAdmin) {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {
@@ -62,7 +67,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           {/* Logo/Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#042C71] mb-2">Tasky</h1>
+            <h1 className="text-3xl font-bold text-[#042C71] mb-2">Mita</h1>
             <p className="text-gray-600">Login to start earning</p>
           </div>
 

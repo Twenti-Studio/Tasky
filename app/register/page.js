@@ -62,7 +62,9 @@ export default function RegisterPage() {
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
-      router.push('/dashboard');
+      // Redirect to login instead of dashboard
+      alert('Registration successful! Please login with your credentials.');
+      router.push('/login');
     } catch (err) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -79,7 +81,7 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           {/* Logo/Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#042C71] mb-2">Tasky</h1>
+            <h1 className="text-3xl font-bold text-[#042C71] mb-2">Mita</h1>
             <p className="text-gray-600">Create your account</p>
           </div>
 

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { ArrowRight, Clock, Coins, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { Coins, ArrowRight, Clock, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -15,10 +15,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    } else if (user) {
-      fetchData();
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.isAdmin) {
+        router.push('/admin');
+      } else {
+        fetchData();
+      }
     }
   }, [user, authLoading, router]);
 
@@ -60,7 +64,7 @@ export default function DashboardPage() {
         {/* Welcome */}
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-800">Hi, {user?.username}!</h1>
-          <p className="text-sm text-gray-500">Welcome back to Tasky</p>
+          <p className="text-sm text-gray-500">Welcome back to Mita</p>
         </div>
 
         {/* Balance Card */}
@@ -68,9 +72,9 @@ export default function DashboardPage() {
           <p className="text-sm opacity-80 mb-1">Your Balance</p>
           <p className="text-4xl font-bold mb-4">{formatPoints(user?.balance || 0)}</p>
           <p className="text-sm opacity-80">points</p>
-          
+
           {canWithdraw ? (
-            <Link 
+            <Link
               href="/withdraw"
               className="mt-4 inline-flex items-center gap-2 bg-white text-[#042C71] px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition"
             >
@@ -96,7 +100,7 @@ export default function DashboardPage() {
             <p className="font-semibold text-gray-800">Earn Points</p>
             <p className="text-xs text-gray-500 mt-1">Complete tasks</p>
           </Link>
-          
+
           <Link
             href="/withdraw"
             className="bg-white border border-gray-200 rounded-xl p-4 hover:border-[#042C71] hover:shadow-md transition"
@@ -140,8 +144,8 @@ export default function DashboardPage() {
             <div className="text-center py-8">
               <Clock className="w-10 h-10 text-gray-300 mx-auto mb-2" />
               <p className="text-gray-500 text-sm">No activity yet</p>
-              <Link 
-                href="/tasks" 
+              <Link
+                href="/tasks"
                 className="text-[#042C71] text-sm hover:underline mt-2 inline-block"
               >
                 Start earning now →

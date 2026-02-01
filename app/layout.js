@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Tasky — Earn Points with Micro Tasks",
+  title: "Mita — Earn Points with Micro Tasks",
   description: "Join the most trusted micro-task platform in Indonesia. Earn points by completing simple tasks and convert them to cash!",
 };
 

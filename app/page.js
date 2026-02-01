@@ -30,14 +30,10 @@ export default function Home() {
         </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 animate-fade-in-up">Tasky</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 animate-fade-in-up">Mikro Task</h1>
           <p className="text-base md:text-lg text-blue-300/90 font-medium tracking-wide animate-fade-in-up delay-150">
             Powered by Twenti Studio
           </p>
-
-          <span className="inline-block py-1 px-3 rounded-full bg-green-600/80 border border-green-500 text-white text-sm font-medium mb-6 animate-fade-in-up">
-            Now Live! 🎉
-          </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight animate-fade-in-up delay-100">
             Earn Money with Simple Tasks
           </h1>

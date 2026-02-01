@@ -1,6 +1,6 @@
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ const generateToken = (userId) => {
   );
 };
 
-// Register new user again
+// Register new user
 export const register = async (req, res) => {
   try {
     const { email, username, password, name } = req.body;
@@ -38,7 +38,7 @@ export const register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: existingUser.email === email ? 'Email already registered' : 'Username already taken'
       });
     }
@@ -108,6 +108,11 @@ export const login = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Check if account is active
+    if (!user.isActive) {
+      return res.status(403).json({ error: 'Account is disabled. Please contact support.' });
     }
 
     // Check password

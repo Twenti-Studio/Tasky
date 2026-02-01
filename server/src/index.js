@@ -10,7 +10,7 @@ import express from 'express';
 dotenv.config();
 
 console.log('=====================================');
-console.log('TASKY SERVER STARTING');
+console.log('Mita SERVER STARTING');
 console.log('=====================================');
 console.log('Time:', new Date().toISOString());
 console.log('Node:', process.version);
@@ -21,15 +21,19 @@ console.log('JWT:', process.env.JWT_SECRET ? 'SET' : 'NOT SET');
 
 // Set defaults
 if (!process.env.JWT_SECRET) {
-  process.env.JWT_SECRET = 'tasky-default-secret-2024';
+  process.env.JWT_SECRET = 'mita-default-secret-2024';
   console.log('WARNING: Using default JWT_SECRET');
 }
 
 // Import routes
+import adminRoutes from './routes/admin.js';
 import authRoutes from './routes/auth.js';
 import callbackRoutes from './routes/callback.js';
 import monetagRoutes from './routes/monetag.js';
 import userRoutes from './routes/user.js';
+
+// Import utilities
+import { seedAdmin } from './utils/seedAdmin.js';
 
 console.log('Routes imported OK');
 
@@ -50,17 +54,18 @@ console.log('Middleware OK');
 
 // Health check FIRST
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Tasky API is running' });
+  res.json({ status: 'ok', message: 'Mita API is running' });
 });
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Tasky API v1.0' });
+  res.json({ message: 'Mita API v1.0' });
 });
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/monetag', monetagRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/v1/callback', callbackRoutes);
 
 console.log('Routes mounted OK');
@@ -72,8 +77,14 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log('=====================================');
   console.log('SERVER RUNNING ON PORT', PORT);
   console.log('=====================================');
+
+  // Seed default admin account for development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('\nSeeding default admin account...');
+    await seedAdmin();
+  }
 });

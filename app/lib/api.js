@@ -1,6 +1,6 @@
 // API client for backend communication
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tasky-production-c3a6.up.railway.app/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 class ApiClient {
   constructor() {
@@ -99,6 +99,13 @@ class ApiClient {
     return this.request('/user/withdrawals');
   }
 
+  async updateBankAccount(bankData) {
+    return this.request('/user/bank-account', {
+      method: 'PUT',
+      body: JSON.stringify(bankData),
+    });
+  }
+
   async requestWithdrawal(amount, method, accountNumber, accountName) {
     return this.request('/user/withdraw', {
       method: 'POST',
@@ -123,6 +130,56 @@ class ApiClient {
 
   async getImpressions() {
     return this.request('/monetag/impressions');
+  }
+
+  // Complete task and credit points
+  async completeTask(provider, taskType, points) {
+    return this.request('/monetag/complete-task', {
+      method: 'POST',
+      body: JSON.stringify({ provider, taskType, points }),
+    });
+  }
+
+  // Admin endpoints
+  async getAdminStats() {
+    return this.request('/admin/stats');
+  }
+
+  async getAdminUsers(page = 1, limit = 20) {
+    return this.request(`/admin/users?page=${page}&limit=${limit}`);
+  }
+
+  async updateUserStatus(userId, isActive) {
+    return this.request(`/admin/users/${userId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
+    });
+  }
+
+  async getAdminWithdrawals(status = 'all') {
+    return this.request(`/admin/withdrawals?status=${status}`);
+  }
+
+  async updateWithdrawalStatus(withdrawalId, status, adminNote) {
+    return this.request(`/admin/withdrawals/${withdrawalId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, adminNote }),
+    });
+  }
+
+  // Settings
+  async updateProfile(data) {
+    return this.request('/user/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(currentPassword, newPassword) {
+    return this.request('/user/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
   }
 }
 
