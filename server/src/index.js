@@ -66,7 +66,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/monetag', monetagRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/v1/callback', callbackRoutes);
+app.use('/api/callback', callbackRoutes);
 
 console.log('Routes mounted OK');
 
