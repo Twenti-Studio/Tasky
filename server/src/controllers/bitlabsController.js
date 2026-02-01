@@ -18,7 +18,7 @@ const PROVIDER_NAME = 'bitlabs';
 const bitlabsCallback = async (req, res) => {
   try {
     const params = { ...req.query, ...req.body };
-    
+
     const {
       user_id,
       tx,
@@ -46,7 +46,7 @@ const bitlabsCallback = async (req, res) => {
       // BitLabs hash format: SHA1(user_id + tx + value + secret)
       const hashString = `${user_id}${tx}${value}${secretKey}`;
       const calculatedHash = crypto.createHash('sha1').update(hashString).digest('hex');
-      
+
       if (calculatedHash !== hash) {
         console.error(`[${PROVIDER_NAME.toUpperCase()}] Invalid hash`);
         return res.status(200).send('OK');
@@ -149,4 +149,69 @@ const bitlabsCallback = async (req, res) => {
   }
 };
 
-export { bitlabsCallback };
+/**
+ * Fetch available surveys from BitLabs
+ * GET /api/bitlabs/surveys
+ */
+const getBitlabsSurveys = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const token = process.env.NEXT_PUBLIC_BITLABS_TOKEN || '3cbd4dde-42bf-4dfb-8463-58146b64cc51';
+
+    // BitLabs API endpoint to get surveys
+    const apiUrl = `https://api.bitlabs.ai/v2/surveys?uid=${userId}`;
+
+    console.log(`[BITLABS] Fetching surveys for user ${userId}`);
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-Api-Token': token,
+      }
+    });
+
+    if (!response.ok) {
+      console.error(`[BITLABS] API error: ${response.status} ${response.statusText}`);
+      return res.json({
+        success: true,
+        surveys: [],
+        error: `API returned ${response.status}`
+      });
+    }
+
+    const data = await response.json();
+
+    console.log(`[BITLABS] Retrieved ${data?.surveys?.length || 0} surveys`);
+
+    // Transform surveys to our format
+    const surveys = (data.surveys || []).map(survey => ({
+      id: survey.id,
+      category: survey.category || 'general',
+      loi: survey.loi, // Length of interview in minutes
+      reward: survey.value, // Reward in USD cents
+      points: Math.round(survey.value * 100), // Convert to points (1 cent = 100 points)
+      link: survey.link,
+      rating: survey.rating,
+      tags: survey.tags || [],
+      type: survey.type || 'survey',
+    }));
+
+    return res.json({
+      success: true,
+      surveys,
+      count: surveys.length
+    });
+
+  } catch (error) {
+    console.error('[BITLABS] Error fetching surveys:', error);
+    return res.json({
+      success: true,
+      surveys: [],
+      error: error.message
+    });
+  }
+};
+
+export { bitlabsCallback, getBitlabsSurveys };
+

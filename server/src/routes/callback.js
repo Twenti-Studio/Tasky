@@ -2,17 +2,17 @@ import express from 'express';
 const router = express.Router();
 
 // Import controllers
+import { bitlabsCallback, getBitlabsSurveys } from '../controllers/bitlabsController.js';
 import { cpxCallback, getCpxUrl } from '../controllers/cpxController.js';
-import { monetagCallback } from '../controllers/monetagController.js';
-import { timewallCallback } from '../controllers/timewallController.js';
-import { bitlabsCallback } from '../controllers/bitlabsController.js';
-import { lootablyCallback } from '../controllers/lootablyController.js';
-import { revlumCallback } from '../controllers/revlumController.js';
 import { genericCallback, getProviderUrl } from '../controllers/genericProviderController.js';
+import { lootablyCallback } from '../controllers/lootablyController.js';
+import { monetagCallback } from '../controllers/monetagController.js';
+import { revlumCallback } from '../controllers/revlumController.js';
+import { timewallCallback } from '../controllers/timewallController.js';
 
 // Import security middleware
-import { cpxIpWhitelist, verifyCpxHash, sanitizeInput, simpleRateLimit } from '../middleware/security.js';
 import { authenticate } from '../middleware/auth.js';
+import { cpxIpWhitelist, sanitizeInput, simpleRateLimit, verifyCpxHash } from '../middleware/security.js';
 
 /**
  * UNIFIED POSTBACK ROUTING SYSTEM
@@ -44,6 +44,7 @@ router.post('/timewall', sanitizeInput, simpleRateLimit(500, 60000), timewallCal
 // ============================================
 router.get('/bitlabs', sanitizeInput, simpleRateLimit(500, 60000), bitlabsCallback);
 router.post('/bitlabs', sanitizeInput, simpleRateLimit(500, 60000), bitlabsCallback);
+router.get('/bitlabs/surveys', authenticate, getBitlabsSurveys);
 
 // ============================================
 // LOOTABLY (Video & Offers)

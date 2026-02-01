@@ -181,6 +181,11 @@ class ApiClient {
       body: JSON.stringify({ currentPassword, newPassword }),
     });
   }
+
+  // BitLabs endpoints
+  async getBitlabsSurveys() {
+    return this.request('/callback/bitlabs/surveys');
+  }
 }
 
 export const api = new ApiClient();

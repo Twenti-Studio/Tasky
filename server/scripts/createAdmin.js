@@ -1,80 +1,65 @@
-// Script to create or promote a user to admin
-// Usage: node scripts/createAdmin.js <username-or-email> [password]
-
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const prisma = new PrismaClient();
 
-async function createOrPromoteAdmin() {
-    const usernameOrEmail = process.argv[2];
-    const password = process.argv[3];
-
-    if (!usernameOrEmail) {
-        console.log('Usage:');
-        console.log('  Promote existing user: node scripts/createAdmin.js <username-or-email>');
-        console.log('  Create new admin: node scripts/createAdmin.js <email> <password>');
-        process.exit(1);
-    }
-
+async function createAdmin() {
     try {
-        // Check if user exists
-        let user = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    { email: usernameOrEmail },
-                    { username: usernameOrEmail }
-                ]
-            }
+        const adminEmail = 'admin@mita.com';
+        const adminPassword = 'Admin123!';
+
+        // Check if admin exists
+        const existing = await prisma.user.findUnique({
+            where: { email: adminEmail }
         });
 
-        if (user) {
-            // Promote existing user to admin
-            user = await prisma.user.update({
-                where: { id: user.id },
-                data: {
-                    isAdmin: true,
-                    isActive: true  // Ensure account is active
-                }
-            });
-            console.log('✅ User promoted to admin successfully!');
-            console.log(`   Username: ${user.username}`);
-            console.log(`   Email: ${user.email}`);
-            console.log(`   isAdmin: ${user.isAdmin}`);
-            console.log(`   isActive: ${user.isActive}`);
-        } else if (password) {
-            // Create new admin user
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const username = usernameOrEmail.split('@')[0] || 'admin';
+        if (existing) {
+            console.log('❌ Admin already exists!');
+            console.log('Email:', existing.email);
+            console.log('Username:', existing.username);
 
-            user = await prisma.user.create({
+            // Try to update password
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
+            await prisma.user.update({
+                where: { email: adminEmail },
                 data: {
-                    email: usernameOrEmail,
-                    username: username,
                     password: hashedPassword,
-                    name: 'Administrator',
                     isAdmin: true,
                     isActive: true
                 }
             });
-            console.log('✅ Admin user created successfully!');
-            console.log(`   Username: ${user.username}`);
-            console.log(`   Email: ${user.email}`);
-            console.log(`   isAdmin: ${user.isAdmin}`);
-        } else {
-            console.log('❌ User not found. To create a new admin, provide password:');
-            console.log(`   node scripts/createAdmin.js ${usernameOrEmail} <password>`);
-            process.exit(1);
+            console.log('✅ Password updated to: Admin123!');
+            process.exit(0);
+            return;
         }
+
+        // Create new admin
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+        const admin = await prisma.user.create({
+            data: {
+                email: adminEmail,
+                username: 'admin',
+                password: hashedPassword,
+                name: 'Administrator',
+                isAdmin: true,
+                isActive: true,
+                balance: 0
+            }
+        });
+
+        console.log('✅ Admin created successfully!');
+        console.log('=====================================');
+        console.log('Email: admin@mita.com');
+        console.log('Password: Admin123!');
+        console.log('Username:', admin.username);
+        console.log('=====================================');
+
+        process.exit(0);
     } catch (error) {
         console.error('❌ Error:', error.message);
+        console.error('Full error:', error);
         process.exit(1);
-    } finally {
-        await prisma.$disconnect();
     }
 }
 
-createOrPromoteAdmin();
+createAdmin();
