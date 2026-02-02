@@ -16,6 +16,7 @@ import {
   Star,
   Target,
   TrendingUp,
+  X,
   Zap
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -37,6 +38,10 @@ export default function TasksPage() {
   const [loadingSurveys, setLoadingSurveys] = useState(true);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [isProduction, setIsProduction] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState(null);
+  const [iframeLoading, setIframeLoading] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
+  const [taskWindow, setTaskWindow] = useState(null);
 
   // Helper: Get today's date string (YYYY-MM-DD)
   const getTodayString = () => {
@@ -77,6 +82,66 @@ export default function TasksPage() {
       });
     }
   }, []);
+
+  // Shield against top-level redirection hijacking
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (iframeUrl) {
+        // This will trigger a browser confirmation dialog if a script tries to redirect the parent
+        e.preventDefault();
+        e.returnValue = 'Tugas sedang berjalan. Tetap di halaman ini untuk melanjutkan pengerjaan.';
+        return e.returnValue;
+      }
+    };
+
+    // Prevent any scripts from redirecting the parent window
+    const preventTopNavigation = (e) => {
+      if (iframeUrl && e.target !== window.self) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[Security] Blocked navigation attempt from iframe');
+      }
+    };
+
+    // Listen for messages from iframe (proxy fallback handling)
+    const handleMessage = (event) => {
+      // Security: Only accept messages from our domain
+      if (event.origin !== window.location.origin && !event.origin.includes('localhost')) {
+        return;
+      }
+
+      const { type, provider, error } = event.data;
+
+      if (type === 'PROXY_FAILED') {
+        console.warn(`[Proxy] Failed for ${provider}:`, error);
+        // Auto fallback to popup after 2 seconds
+        setTimeout(() => {
+          if (iframeUrl && iframeUrl.includes('/api/proxy/')) {
+            setIframeError(true);
+            toast.info('Provider requires separate window. Click button below.', {
+              title: 'Opening in New Window',
+              duration: 4000,
+            });
+          }
+        }, 2000);
+      } else if (type === 'TASK_CONTENT_READY') {
+        console.log(`[Proxy] Content ready for ${provider}`);
+        setIframeLoading(false);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('hashchange', preventTopNavigation);
+    window.addEventListener('popstate', preventTopNavigation);
+    window.addEventListener('message', handleMessage);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('hashchange', preventTopNavigation);
+      window.removeEventListener('popstate', preventTopNavigation);
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [iframeUrl]);
 
   // Fetch BitLabs surveys from API
   useEffect(() => {
@@ -347,9 +412,25 @@ export default function TasksPage() {
     { id: 'offers', label: 'Offers', icon: Gift },
   ];
 
-  const filteredProviders = activeCategory === 'all'
-    ? allProviders
-    : allProviders.filter(p => p.category === activeCategory);
+  // Create a flat list of all tasks from all providers
+  const allTasks = allProviders.flatMap(provider =>
+    provider.tasks.map(task => ({
+      ...task,
+      provider: provider,
+      // For categorization: use task category if it exists (for dynamic ones), otherwise use provider category
+      displayCategory: task.isDynamicSurvey ? (task.points >= 200 ? 'surveys' : 'tasks') : provider.category
+    }))
+  );
+
+  // Group the flat tasks by category for display
+  const displayGroups = categories.filter(c => c.id !== 'all').map(cat => {
+    const tasks = allTasks.filter(t => t.displayCategory === cat.id);
+    return { ...cat, tasks };
+  }).filter(group => group.tasks.length > 0);
+
+  const finalDisplay = activeCategory === 'all'
+    ? displayGroups
+    : displayGroups.filter(g => g.id === activeCategory);
 
   // Helper: Save daily completed task
   const saveDailyTask = (taskKey) => {
@@ -381,8 +462,9 @@ export default function TasksPage() {
 
     try {
       if (task.isDynamicSurvey) {
-        // Open dynamic survey link directly
-        window.open(task.link, '_blank', 'width=800,height=600');
+        // Open dynamic survey link in-app
+        setIframeLoading(true);
+        setIframeUrl(task.link);
       } else if (task.isOfferwall) {
         openOfferwall(provider.id);
       } else {
@@ -402,9 +484,10 @@ export default function TasksPage() {
                 duration: 5000,
               });
 
-              // Open Monetag link
+              // Open Monetag link in-app
               const monetagUrl = `https://otieu.com/4/10505263?subid=${user.id}&type=${task.id}`;
-              window.open(monetagUrl, '_blank');
+              setIframeLoading(true);
+              setIframeUrl(monetagUrl);
             } else if (result.error) {
               // Check if it's a daily limit error
               if (result.dailyLimitReached) {
@@ -504,7 +587,8 @@ export default function TasksPage() {
   };
 
   const openOfferwall = (provider) => {
-    const urls = {
+    // Original URLs untuk fallback
+    const directUrls = {
       cpx: `https://offers.cpx-research.com/index.php?app_id=${process.env.NEXT_PUBLIC_CPX_APP_ID}&ext_user_id=${user.id}`,
       timewall: `https://timewall.io/offer?pub=${process.env.NEXT_PUBLIC_TIMEWALL_PUB_ID}&user_id=${user.id}`,
       lootably: `https://wall.lootably.com/?placementID=${process.env.NEXT_PUBLIC_LOOTABLY_PLACEMENT_ID}&userID=${user.id}`,
@@ -512,15 +596,83 @@ export default function TasksPage() {
       theoremreach: `https://theoremreach.com/respondent_entry/direct?api_key=${process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID}&user_id=${user.id}&transaction_id=${Date.now()}`,
     };
 
-    if (urls[provider]) {
-      window.open(urls[provider], '_blank', 'width=800,height=600');
-      toast.info('Survey wall opened in a new window', {
-        title: 'Opening Task...',
-        duration: 3000,
+    if (directUrls[provider]) {
+      // Try proxy endpoint first untuk maximum in-app experience
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const proxyUrl = `${backendUrl}/api/proxy/offerwall/${provider}?user_id=${user.id}`;
+      
+      console.log(`[Tasks] Opening ${provider} via proxy:`, proxyUrl);
+      
+      setIframeLoading(true);
+      setIframeError(false);
+      setIframeUrl(proxyUrl);
+      
+      // Store direct URL untuk fallback
+      window._directTaskUrl = directUrls[provider];
+      window._currentProvider = provider;
+      
+      // Set timeout untuk auto-fallback jika proxy gagal
+      setTimeout(() => {
+        if (iframeLoading) {
+          console.warn('[Iframe] Taking too long to load via proxy');
+        }
+      }, 8000);
+      
+      toast.info('Opening task wall via secure connection...', {
+        title: 'Loading Task',
+        duration: 2000,
       });
     } else {
       toast.warning('This task is not available right now. Please try again later.', {
         title: 'Task Unavailable',
+      });
+    }
+  };
+
+  // Function to open task in controlled popup as fallback
+  const openInPopup = (url) => {
+    // Close previous popup if exists
+    if (taskWindow && !taskWindow.closed) {
+      taskWindow.close();
+    }
+
+    // Open in popup with specific size
+    const width = 800;
+    const height = 800;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    const popup = window.open(
+      url,
+      'MitaTask',
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes,menubar=no,toolbar=no,location=no`
+    );
+    
+    if (popup) {
+      setTaskWindow(popup);
+      
+      // Monitor popup
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          setTaskWindow(null);
+          // Refresh user balance when popup closes
+          refreshUser();
+          toast.info('Task window closed. Checking for updates...', {
+            title: 'Task Complete',
+            duration: 3000,
+          });
+        }
+      }, 1000);
+      
+      toast.success('Task opened in new window. Complete the task and close when done.', {
+        title: 'Task Window Opened',
+        duration: 4000,
+      });
+    } else {
+      toast.error('Please allow popups for this site to complete tasks.', {
+        title: 'Popup Blocked',
+        duration: 5000,
       });
     }
   };
@@ -579,28 +731,29 @@ export default function TasksPage() {
             </div>
           )}
 
-          <div className="space-y-4">
-            {filteredProviders.map((provider) => {
-              const Icon = provider.icon;
+          <div className="space-y-6">
+            {finalDisplay.map((group) => {
+              const GroupIcon = group.icon;
               return (
-                <div key={provider.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div key={group.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${provider.color} rounded-lg flex items-center justify-center`}>
-                        <Icon className="text-white" size={20} />
+                      <div className="w-10 h-10 bg-[#042C71] rounded-lg flex items-center justify-center">
+                        <GroupIcon className="text-white" size={20} />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800">{provider.name}</h3>
-                        <p className="text-xs text-gray-500">{provider.description}</p>
+                        <h3 className="font-semibold text-gray-800">{group.label}</h3>
+                        <p className="text-xs text-gray-500">Pilih tugas yang tersedia di bawah ini</p>
                       </div>
-                      <span className="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-1 rounded">
-                        {provider.payout}
+                      <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                        {group.tasks.length} Tersedia
                       </span>
                     </div>
                   </div>
 
                   <div className="divide-y divide-gray-100">
-                    {provider.tasks.map((task) => {
+                    {group.tasks.map((task) => {
+                      const provider = task.provider;
                       const taskKey = `${provider.id}-${task.id}`;
                       const isCompleted = completedTasks.has(taskKey);
                       const isCompletedToday = dailyCompletedTasks.has(taskKey);
@@ -610,8 +763,12 @@ export default function TasksPage() {
 
                       return (
                         <button
-                          key={task.id}
-                          onClick={() => handleTask(provider, task)}
+                          key={taskKey}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleTask(provider, task);
+                          }}
                           disabled={isProcessing}
                           className={`w-full p-4 flex items-center gap-3 transition text-left
                             ${isCompletedToday && isDailyMission
@@ -669,7 +826,7 @@ export default function TasksPage() {
             })}
           </div>
 
-          {filteredProviders.length === 0 && !loadingSurveys && (
+          {finalDisplay.length === 0 && !loadingSurveys && (
             <div className="bg-white border border-gray-200 rounded-xl p-8 text-center mt-4">
               <p className="text-gray-500">No tasks currently available in this category.</p>
               <button
@@ -690,6 +847,169 @@ export default function TasksPage() {
           </div>
         </div>
       </div >
+
+      {/* In-App Task Modal */}
+      {iframeUrl && (
+        <div className="fixed inset-0 z-[1003] bg-gray-900/80 backdrop-blur-sm flex items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+          <div className="bg-white w-full h-full md:max-w-4xl md:h-[90vh] md:rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-2 border-b bg-white shadow-sm z-30">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 bg-[#042C71] rounded-lg flex items-center justify-center">
+                  <Target className="text-white" size={14} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-800 text-xs md:text-sm">Mita Secure Task</h3>
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></div>
+                    <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">Verifikasi Aktif • Aman di dalam App</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setIframeLoading(true);
+                    // Force iframe reload by updating key
+                    const currentUrl = iframeUrl;
+                    setIframeUrl(null);
+                    setTimeout(() => setIframeUrl(currentUrl), 100);
+                  }}
+                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
+                  title="Refresh Task"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                </button>
+                <button
+                  onClick={() => {
+                    setIframeUrl(null);
+                    setIframeLoading(false);
+                  }}
+                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition"
+                  title="Tutup Task"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Iframe Container with Shifting Logic to hide headers */}
+            <div className="flex-1 bg-gray-50 flex items-center justify-center relative overflow-hidden">
+              {iframeLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-[30] bg-white">
+                  <div className="flex flex-col items-center animate-pulse">
+                    <div className="w-16 h-16 bg-[#042C71]/10 rounded-2xl flex items-center justify-center mb-4">
+                      <Target className="text-[#042C71]" size={32} />
+                    </div>
+                    <h4 className="font-bold text-gray-800">Menyiapkan Tugas...</h4>
+                    <p className="text-xs text-gray-400 mt-1">Sesi terenkripsi sedang dibangun</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Branding Overlay to mask top areas if shifting isn't enough */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#042C71] to-blue-500 z-[25]"></div>
+
+              <div className="w-full h-full relative z-20 overflow-hidden">
+                {iframeError ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-white p-8">
+                    <div className="max-w-md text-center">
+                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-800 mb-2">Silahkan Klik Button Buka di Window Baru</h3>
+                      <p className="text-sm text-gray-600 mb-6">
+                        Task akan dibuka di window terpisah dengan tracking yang aman.
+                      </p>
+                      <button
+                        onClick={() => {
+                          // Use stored direct URL or fallback to current iframeUrl
+                          const targetUrl = window._directTaskUrl || iframeUrl;
+                          openInPopup(targetUrl);
+                          setIframeUrl(null);
+                          setIframeError(false);
+                        }}
+                        className="bg-[#042C71] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#042C71]/90 transition"
+                      >
+                        Buka di Window Baru
+                      </button>
+                      <p className="text-xs text-gray-500 mt-3 mb-2">
+                        {/* ✓ Revenue share tetap aman<br/> */}
+                        ✓ Poin otomatis masuk setelah selesai
+                      </p>
+                      <button
+                        onClick={() => {
+                          setIframeUrl(null);
+                          setIframeError(false);
+                          setIframeLoading(false);
+                        }}
+                        className="mt-2 text-sm text-gray-500 hover:text-gray-700 block w-full"
+                      >
+                        Kembali ke Daftar Task
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <iframe
+                    key={iframeUrl}
+                    src={iframeUrl}
+                    className="w-full h-full border-none"
+                    title="Task Content"
+                    sandbox="allow-forms allow-scripts allow-same-origin allow-modals allow-popups allow-popups-to-escape-sandbox"
+                    referrerPolicy="no-referrer"
+                    allow="camera; microphone; geolocation; accelerometer; gyroscope; magnetometer"
+                    onLoad={(e) => {
+                      try {
+                        // Check if iframe content is accessible (not blocked by X-Frame-Options)
+                        const iframe = e.target;
+                        setTimeout(() => {
+                          try {
+                            // Try to access iframe content
+                            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                            if (!iframeDoc) {
+                              throw new Error('Cannot access iframe content');
+                            }
+                            setIframeLoading(false);
+                            console.log('[Iframe] Loaded successfully');
+                          } catch (err) {
+                            // Iframe is blocked by X-Frame-Options or CORS
+                            console.warn('[Iframe] Blocked by provider:', err.message);
+                            setIframeError(true);
+                            setIframeLoading(false);
+                            toast.warning('Provider memblokir iframe. Gunakan popup window.', {
+                              title: 'Iframe Blocked',
+                              duration: 4000,
+                            });
+                          }
+                        }, 1000);
+                      } catch (err) {
+                        console.error('[Iframe] Error checking load:', err);
+                        setTimeout(() => setIframeLoading(false), 800);
+                      }
+                    }}
+                    onError={(e) => {
+                      console.error('[Iframe] Load error:', e);
+                      setIframeError(true);
+                      setIframeLoading(false);
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Verification Footer */}
+            <div className="px-4 py-3 border-t bg-gray-50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-[10px] text-gray-500 font-medium">Auto-Verification Active</span>
+              </div>
+              <div className="text-[10px] text-gray-400">
+                Poin akan ditambahkan setelah sistem mendeteksi penyelesaian tugas.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

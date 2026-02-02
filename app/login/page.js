@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -45,7 +46,6 @@ export default function LoginPage() {
 
     try {
       const result = await login(formData);
-      // Redirect admin to admin panel, regular users to dashboard
       if (result.user?.isAdmin) {
         router.push('/admin');
       } else {
@@ -58,95 +58,131 @@ export default function LoginPage() {
     }
   };
 
-  // Common input styles with proper text color
-  const inputStyles = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent outline-none transition bg-white text-gray-900 placeholder-gray-400";
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#042C71] to-blue-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          {/* Logo/Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#042C71] mb-2">Mita</h1>
-            <p className="text-gray-600">Login to start earning</p>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#042C71] p-12 flex-col justify-between">
+        <div>
+          <Link href="/" className="flex items-center gap-2">
+            <Image 
+              src="/icon.png" 
+              alt="Mikro Task" 
+              width={40} 
+              height={40}
+              className="rounded-lg"
+            />
+            <span className="text-white text-xl font-bold">Mikro Task</span>
+          </Link>
+        </div>
+        
+        <div className="space-y-6">
+          <h1 className="text-4xl font-bold text-white leading-tight">
+            Selamat Datang Kembali
+          </h1>
+          <p className="text-blue-200 text-lg">
+            Masuk untuk melanjutkan dan mulai menghasilkan dari tugas-tugas sederhana.
+          </p>
+        </div>
+
+        <p className="text-blue-300 text-sm">
+          © 2026 Twenti Studio
+        </p>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden mb-8">
+            <Link href="/" className="flex items-center gap-2">
+              <Image 
+                src="/icon.png" 
+                alt="Mikro Task" 
+                width={36} 
+                height={36}
+                className="rounded-lg"
+              />
+              <span className="text-[#042C71] text-xl font-bold">Mikro Task</span>
+            </Link>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Login</h2>
+            <p className="text-gray-500 text-sm mb-6">
+              Masukkan email dan password untuk melanjutkan
+            </p>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700 mb-1">
-                Email or Username
-              </label>
-              <input
-                type="text"
-                id="emailOrUsername"
-                name="emailOrUsername"
-                value={formData.emailOrUsername}
-                onChange={handleChange}
-                required
-                className={inputStyles}
-                placeholder="Enter your email or username"
-                autoComplete="username"
-              />
-            </div>
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Email atau Username
+                </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
+                  type="text"
+                  id="emailOrUsername"
+                  name="emailOrUsername"
+                  value={formData.emailOrUsername}
                   onChange={handleChange}
                   required
-                  className={`${inputStyles} pr-12`}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent outline-none transition bg-white text-gray-900 placeholder-gray-400"
+                  placeholder="Masukkan email atau username"
+                  autoComplete="username"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none p-1"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-                </button>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#042C71] text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent outline-none transition bg-white text-gray-900 placeholder-gray-400 pr-12"
+                    placeholder="Masukkan password"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+              </div>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <Link href="/register" className="text-[#042C71] font-semibold hover:underline">
-                Register here
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#042C71] hover:bg-[#031d4d] text-white py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Memproses...' : 'Login'}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center text-sm">
+              <span className="text-gray-500">Belum punya akun? </span>
+              <Link href="/register" className="text-[#042C71] font-medium hover:underline">
+                Daftar
               </Link>
-            </p>
+            </div>
           </div>
 
-          {/* Back to Home */}
-          <div className="mt-4 text-center">
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-              ← Back to Home
+          <div className="mt-6 text-center">
+            <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition">
+              ← Kembali ke Beranda
             </Link>
           </div>
         </div>

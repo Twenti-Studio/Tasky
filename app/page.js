@@ -1,65 +1,218 @@
+'use client';
+
+import Image from 'next/image';
 import Link from "next/link";
+import { useEffect, useRef } from 'react';
 import FeatureSection from "./components/FeatureSection";
-import WaitlistForm from "./components/WaitlistForm";
+import LandingNavbar from "./components/LandingNavbar";
+import StatsSection from "./components/StatsSection";
+import TestimonialSection from "./components/TestimonialSection";
 
 export default function Home() {
+  const observerRef = useRef(null);
+
+  // Scroll reveal animation
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    document.querySelectorAll('.scroll-reveal').forEach((el) => {
+      observerRef.current.observe(el);
+    });
+
+    return () => observerRef.current?.disconnect();
+  }, []);
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* Navbar */}
+      <LandingNavbar />
+
       {/* Hero Section */}
-      <section className="bg-[#042C71] text-white pt-24 pb-32 px-4 relative overflow-hidden">
-        {/* Background Accents (optional for 'fintech' feel) */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-800/20 skew-x-12 transform translate-x-20 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <section id="home" className="hero-gradient-bg text-white pt-28 pb-20 px-4 relative overflow-hidden">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-10 left-10 w-64 h-64 bg-[#CE4912]/10 rounded-full blur-3xl animate-blob-delay-2" />
+        <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-blue-400/10 rounded-full blur-3xl animate-blob-delay-4" />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="animate-fade-in-up">
+              <p className="text-blue-300 text-sm font-medium mb-4 tracking-wide">
+                Platform Mikro Task Terpercaya di Indonesia
+              </p>
+              
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                Dapatkan Penghasilan dari
+                <span className="text-gradient-animate"> Tugas Sederhana</span>
+              </h1>
+              
+              <p className="text-blue-100 text-lg mb-8 leading-relaxed opacity-0 animate-fade-in-up delay-200" style={{ animationFillMode: 'forwards' }}>
+                Selesaikan survei, tonton iklan, dan kerjakan tugas-tugas simpel untuk mendapatkan poin yang bisa ditukar ke saldo e-wallet favoritmu.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up delay-300" style={{ animationFillMode: 'forwards' }}>
+                <Link 
+                  href="/register"
+                  className="px-8 py-3 bg-[#CE4912] hover:bg-[#b84010] text-white font-semibold rounded-lg transition-all text-center cta-pulse shine-effect btn-press"
+                >
+                  Mulai Sekarang
+                </Link>
+                <Link 
+                  href="/login"
+                  className="px-8 py-3 border border-white/30 hover:bg-white/10 hover:border-white/50 text-white font-semibold rounded-lg transition-all text-center btn-press"
+                >
+                  Sudah Punya Akun
+                </Link>
+              </div>
+              
+              {/* Simple Trust Points */}
+              <div className="flex flex-wrap gap-6 mt-10 text-sm text-blue-200 stagger-fade-in">
+                <span className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span> Gratis Selamanya
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span> Pencairan Cepat
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span> Tanpa Biaya Tersembunyi
+                </span>
+              </div>
+            </div>
 
-        {/* Top Navigation */}
-        <div className="absolute top-4 right-4 z-20">
-          <div className="flex gap-3">
-            <Link 
-              href="/login"
-              className="px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg font-medium transition"
-            >
-              Login
-            </Link>
-            <Link 
-              href="/register"
-              className="px-6 py-2 bg-[#CE4912] hover:bg-orange-600 rounded-lg font-medium transition"
-            >
-              Register
-            </Link>
-          </div>
-        </div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 animate-fade-in-up">Mikro Task</h1>
-          <p className="text-base md:text-lg text-blue-300/90 font-medium tracking-wide animate-fade-in-up delay-150">
-            Powered by Twenti Studio
-          </p>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight tracking-tight animate-fade-in-up delay-100">
-            Earn Money with Simple Tasks
-          </h1>
-          <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-200">
-            Join the most trusted micro-task platform in Indonesia. Earn rewards by completing simple tasks, surveys, and watching ads.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-            <Link 
-              href="/register"
-              className="px-8 py-4 bg-[#CE4912] hover:bg-orange-600 rounded-lg font-bold text-lg transition shadow-lg"
-            >
-              Get Started Now
-            </Link>
-            <Link 
-              href="/login"
-              className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg font-bold text-lg transition"
-            >
-              Login to Dashboard
-            </Link>
+            {/* Right - Mobile App Mockup */}
+            <div className="hidden md:flex justify-center opacity-0 animate-fade-in-right delay-400" style={{ animationFillMode: 'forwards' }}>
+              <div className="relative animate-phone-float phone-glow">
+                {/* Phone Frame */}
+                <div className="relative w-[300px] h-[600px] bg-gray-800 rounded-[3rem] p-3 shadow-2xl border-4 border-gray-700">
+                  {/* Screen */}
+                  <div className="w-full h-full bg-gray-50 rounded-[2.2rem] overflow-hidden relative">
+                    {/* Status Bar */}
+                    <div className="bg-white px-6 py-2 flex justify-between items-center text-xs text-gray-600">
+                      <span>9:41</span>
+                      <div className="flex items-center gap-1">
+                        <div className="w-4 h-2 bg-gray-600 rounded-sm"></div>
+                      </div>
+                    </div>
+                    
+                    {/* App Content */}
+                    <div className="bg-white px-4 py-3">
+                      {/* Header */}
+                      <div className="flex justify-between items-center mb-4">
+                        <Image src="/icon.png" alt="Logo" width={28} height={28} className="rounded-lg" />
+                        <div className="bg-[#042C71] text-white text-xs px-3 py-1 rounded-full font-medium animate-subtle-bounce">
+                          5,000 pts
+                        </div>
+                      </div>
+                      
+                      {/* Welcome */}
+                      <div className="mb-4">
+                        <h3 className="text-lg font-bold text-gray-900">Hi, User!</h3>
+                        <p className="text-xs text-gray-500">Welcome back to Mita</p>
+                      </div>
+                      
+                      {/* Balance Card */}
+                      <div className="bg-gradient-to-br from-[#042C71] to-blue-700 rounded-2xl p-4 mb-4 shine-effect">
+                        <p className="text-blue-200 text-xs mb-1">Your Balance</p>
+                        <p className="text-3xl font-bold text-white">5,000</p>
+                        <p className="text-blue-200 text-xs">points</p>
+                      </div>
+                      
+                      {/* Quick Actions */}
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 card-hover cursor-pointer">
+                          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
+                            <span className="text-orange-500 text-sm">📋</span>
+                          </div>
+                          <p className="text-xs font-medium text-gray-900">Earn Points</p>
+                          <p className="text-[10px] text-gray-400">Complete tasks</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 card-hover cursor-pointer">
+                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mb-2">
+                            <span className="text-green-500 text-sm">💳</span>
+                          </div>
+                          <p className="text-xs font-medium text-gray-900">Withdraw</p>
+                          <p className="text-[10px] text-gray-400">Cash out points</p>
+                        </div>
+                      </div>
+                      
+                      {/* Stats */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                          <p className="text-lg font-bold text-[#042C71]">239</p>
+                          <p className="text-[10px] text-gray-400">Total Earned</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                          <p className="text-lg font-bold text-green-500">8</p>
+                          <p className="text-[10px] text-gray-400">Tasks Done</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Notch */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-7 bg-gray-800 rounded-b-2xl"></div>
+                </div>
+                
+                {/* Decorative elements */}
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#CE4912]/20 rounded-full blur-2xl animate-blob"></div>
+                <div className="absolute -top-6 -right-6 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl animate-blob-delay-2"></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Stats Section */}
+      <div id="how-it-works" className="scroll-reveal">
+        <StatsSection />
+      </div>
+
       {/* Feature Section */}
-      <FeatureSection />
+      <div id="features" className="scroll-reveal">
+        <FeatureSection />
+      </div>
+
+      {/* Testimonial Section */}
+      <div id="testimonials" className="scroll-reveal">
+        <TestimonialSection />
+      </div>
+
+      {/* Final CTA Section */}
+      <section className="py-16 px-4 hero-gradient-bg text-white relative overflow-hidden scroll-reveal">
+        {/* Background animation */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-blob"></div>
+          <div className="absolute bottom-10 right-10 w-40 h-40 bg-[#CE4912]/10 rounded-full blur-2xl animate-blob-delay-2"></div>
+        </div>
+        
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Siap untuk Mulai Menghasilkan?
+          </h2>
+          <p className="text-blue-100 mb-8">
+            Bergabung dengan ribuan pengguna yang sudah mendapatkan penghasilan tambahan setiap hari
+          </p>
+          <Link 
+            href="/register"
+            className="inline-block px-10 py-4 bg-[#CE4912] hover:bg-[#b84010] text-white font-semibold rounded-lg transition-all cta-pulse shine-effect btn-press"
+          >
+            Buat Akun Gratis
+          </Link>
+          <p className="mt-4 text-sm text-blue-300">
+            Tidak perlu kartu kredit • Mulai dalam hitungan menit
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
