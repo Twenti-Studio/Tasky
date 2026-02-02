@@ -1,8 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
-import { AuthProvider } from "./context/AuthContext";
+import { Providers } from "./components/Providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,25 +22,18 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <Script
-          src="https://quge5.com/88/tag.min.js"
-          data-zone="207649"
-          strategy="afterInteractive"
-          data-cfasync="false"
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gray-50`}
       >
-        <AuthProvider>
+        <Providers>
           <Navbar />
           <main className="flex-grow">
             {children}
           </main>
           <Footer />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
 }
+

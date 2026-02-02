@@ -1,12 +1,14 @@
 'use client';
 
+import { ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { Play, ExternalLink } from 'lucide-react';
+import { useToast } from './Toast';
 
 export default function MontagAds({ onAdComplete }) {
   const { user } = useAuth();
+  const toast = useToast();
   const [adLoaded, setAdLoaded] = useState(false);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export default function MontagAds({ onAdComplete }) {
 
   const handleDirectLink = () => {
     if (!user) return;
-    
+
     // Track impression
     api.trackImpression({
       adFormat: 'direct_link',
@@ -54,7 +56,7 @@ export default function MontagAds({ onAdComplete }) {
 
   const handlePopunder = () => {
     if (!user) return;
-    
+
     // Track impression
     api.trackImpression({
       adFormat: 'popunder',
@@ -76,7 +78,7 @@ export default function MontagAds({ onAdComplete }) {
       // Request notification permission
       if ('Notification' in window && 'serviceWorker' in navigator) {
         const permission = await Notification.requestPermission();
-        
+
         if (permission === 'granted') {
           // Track impression
           await api.trackImpression({
@@ -87,20 +89,29 @@ export default function MontagAds({ onAdComplete }) {
             },
           });
 
-          alert('Push notifications enabled! You will earn points when you receive notifications.');
-          
+          toast.success('You will earn points when you receive notifications.', {
+            title: '🔔 Push Notifications Enabled!',
+            duration: 5000,
+          });
+
           if (onAdComplete) {
             onAdComplete();
           }
         } else {
-          alert('Please enable notifications to complete this task.');
+          toast.warning('Please enable notifications to complete this task.', {
+            title: 'Permission Required',
+          });
         }
       } else {
-        alert('Your browser does not support push notifications.');
+        toast.error('Your browser does not support push notifications.', {
+          title: 'Not Supported',
+        });
       }
     } catch (error) {
       console.error('Failed to enable push:', error);
-      alert('Failed to enable push notifications.');
+      toast.error('Failed to enable push notifications. Please try again.', {
+        title: 'Oops! Something went wrong',
+      });
     }
   };
 

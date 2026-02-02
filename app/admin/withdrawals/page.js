@@ -7,9 +7,11 @@ import {
     XCircle
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useToast } from '../../components/Toast';
 import { api } from '../../lib/api';
 
 export default function AdminWithdrawalsPage() {
+    const toast = useToast();
     const [withdrawals, setWithdrawals] = useState([]);
     const [stats, setStats] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -44,10 +46,19 @@ export default function AdminWithdrawalsPage() {
             setModalOpen(false);
             setSelectedWithdrawal(null);
             setAdminNote('');
-            alert(`Withdrawal ${newStatus} successfully!`);
+
+            const statusMessages = {
+                approved: { title: '✅ Approved', message: 'Withdrawal has been approved successfully!' },
+                rejected: { title: '❌ Rejected', message: 'Withdrawal has been rejected.' },
+                completed: { title: '💸 Completed', message: 'Transfer has been marked as complete!' },
+            };
+            const msg = statusMessages[newStatus] || { title: 'Updated', message: `Status changed to ${newStatus}` };
+            toast.success(msg.message, { title: msg.title });
         } catch (error) {
             console.error('Failed to update withdrawal:', error);
-            alert(error.message || 'Failed to update withdrawal');
+            toast.error(error.message || 'Failed to update withdrawal', {
+                title: 'Update Failed',
+            });
         } finally {
             setProcessing(false);
         }
@@ -126,8 +137,8 @@ export default function AdminWithdrawalsPage() {
                         key={f.id}
                         onClick={() => setFilter(f.id)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${filter === f.id
-                                ? 'bg-[#042C71] text-white'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:border-[#042C71]'
+                            ? 'bg-[#042C71] text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-[#042C71]'
                             }`}
                     >
                         {f.label}

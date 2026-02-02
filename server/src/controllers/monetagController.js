@@ -153,6 +153,7 @@ const getImpressions = async (req, res) => {
 /**
  * Complete task and credit points immediately
  * This is called when user clicks on a task button
+ * NOW WITH DAILY LIMIT CHECK - Each task can only be completed once per day
  */
 const completeTask = async (req, res) => {
   try {
@@ -164,27 +165,39 @@ const completeTask = async (req, res) => {
 
     const userId = req.user.id;
 
-    // Generate unique transaction ID for this completion
-    const transactionId = `${provider || 'monetag'}-${taskType}-${userId}-${Date.now()}`;
+    // Get today's start (midnight) in user's timezone (or UTC)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Check if user already completed this task recently (within 5 minutes)
-    const recentTask = await prisma.transaction.findFirst({
+    // Check if user already completed this task TODAY
+    const todayTask = await prisma.transaction.findFirst({
       where: {
         userId,
         provider: provider || 'monetag',
         taskType,
         createdAt: {
-          gte: new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
+          gte: today
         }
       }
     });
 
-    if (recentTask) {
+    if (todayTask) {
+      // Calculate time until reset (midnight)
+      const now = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const hoursRemaining = Math.ceil((tomorrow - now) / (1000 * 60 * 60));
+
       return res.status(400).json({
-        error: 'You already completed this task recently. Please wait a few minutes.',
-        success: false
+        error: `You've already claimed this mission today! Come back in ${hoursRemaining} hours for fresh rewards.`,
+        success: false,
+        dailyLimitReached: true,
+        resetTime: tomorrow.toISOString()
       });
     }
+
+    // Generate unique transaction ID for this completion
+    const transactionId = `${provider || 'monetag'}-${taskType}-${userId}-${Date.now()}`;
 
     // Get reward points
     const rewardPoints = points || getMontagReward(taskType);

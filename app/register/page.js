@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 
 // Eye icons for password visibility toggle
@@ -21,6 +22,7 @@ const EyeSlashIcon = () => (
 
 export default function RegisterPage() {
   const router = useRouter();
+  const toast = useToast();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -63,7 +65,10 @@ export default function RegisterPage() {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
       // Redirect to login instead of dashboard
-      alert('Registration successful! Please login with your credentials.');
+      toast.success('Please login with your credentials.', {
+        title: '✅ Registration Successful!',
+        duration: 5000,
+      });
       router.push('/login');
     } catch (err) {
       setError(err.message || 'Registration failed');

@@ -8,6 +8,7 @@ import { genericCallback, getProviderUrl } from '../controllers/genericProviderC
 import { lootablyCallback } from '../controllers/lootablyController.js';
 import { monetagCallback } from '../controllers/monetagController.js';
 import { revlumCallback } from '../controllers/revlumController.js';
+import { getTheoremreachUrl, theoremreachCallback } from '../controllers/theoremreachController.js';
 import { timewallCallback } from '../controllers/timewallController.js';
 
 // Import security middleware
@@ -59,6 +60,13 @@ router.get('/revlum', sanitizeInput, simpleRateLimit(500, 60000), revlumCallback
 router.post('/revlum', sanitizeInput, simpleRateLimit(500, 60000), revlumCallback);
 
 // ============================================
+// THEOREMREACH (Premium Surveys)
+// ============================================
+router.get('/theoremreach', sanitizeInput, simpleRateLimit(500, 60000), theoremreachCallback);
+router.post('/theoremreach', sanitizeInput, simpleRateLimit(500, 60000), theoremreachCallback);
+router.get('/theoremreach/url', authenticate, getTheoremreachUrl);
+
+// ============================================
 // GENERIC (Template for new providers)
 // ============================================
 router.get('/generic', sanitizeInput, simpleRateLimit(500, 60000), genericCallback);
@@ -80,6 +88,7 @@ router.get('/health', (req, res) => {
       bitlabs: 'active',
       lootably: 'active',
       revlum: 'active',
+      theoremreach: 'active',
     }
   });
 });

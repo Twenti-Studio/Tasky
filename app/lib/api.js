@@ -45,12 +45,23 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
+        // Return error object instead of throwing for better handling
+        // This allows UI to show nice toast messages
+        return {
+          success: false,
+          error: data.error || data.message || 'Request failed',
+          status: response.status
+        };
       }
 
       return data;
     } catch (error) {
-      throw error;
+      // Network error or JSON parse error
+      return {
+        success: false,
+        error: error.message || 'Network error. Please check your connection.',
+        status: 0
+      };
     }
   }
 

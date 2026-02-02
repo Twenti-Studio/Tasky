@@ -8,9 +8,11 @@ import {
     UserX
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useToast } from '../../components/Toast';
 import { api } from '../../lib/api';
 
 export default function AdminUsersPage() {
+    const toast = useToast();
     const [users, setUsers] = useState([]);
     const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
     const [loading, setLoading] = useState(true);
@@ -47,9 +49,21 @@ export default function AdminUsersPage() {
             setUsers(users.map(u =>
                 u.id === userId ? { ...u, isActive: !currentStatus } : u
             ));
+
+            if (currentStatus) {
+                toast.warning('User has been deactivated', {
+                    title: 'User Deactivated',
+                });
+            } else {
+                toast.success('User has been activated', {
+                    title: 'User Activated',
+                });
+            }
         } catch (error) {
             console.error('Failed to update user status:', error);
-            alert(error.message || 'Failed to update user status');
+            toast.error(error.message || 'Failed to update user status', {
+                title: 'Update Failed',
+            });
         }
     };
 
@@ -120,8 +134,8 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td className="py-4 px-4">
                                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${user.isActive
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-700'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-red-100 text-red-700'
                                             }`}>
                                             {user.isActive ? (
                                                 <>
@@ -144,8 +158,8 @@ export default function AdminUsersPage() {
                                             <button
                                                 onClick={() => handleToggleStatus(user.id, user.isActive)}
                                                 className={`px-3 py-1 rounded-lg text-sm font-medium transition ${user.isActive
-                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
                                                     }`}
                                             >
                                                 {user.isActive ? 'Deactivate' : 'Activate'}

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../lib/api';
 
 const AuthContext = createContext({});
@@ -19,7 +19,12 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         api.setToken(token);
         const data = await api.getMe();
-        setUser(data.user);
+        if (data.success !== false && data.user) {
+          setUser(data.user);
+        } else {
+          // Token is invalid or expired
+          api.clearToken();
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -31,12 +36,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const data = await api.login(credentials);
+    if (data.success === false || data.error) {
+      throw new Error(data.error || 'Login failed');
+    }
     setUser(data.user);
     return data;
   };
 
   const register = async (userData) => {
     const data = await api.register(userData);
+    if (data.success === false || data.error) {
+      throw new Error(data.error || 'Registration failed');
+    }
     setUser(data.user);
     return data;
   };
@@ -49,7 +60,9 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const data = await api.getMe();
-      setUser(data.user);
+      if (data.success !== false && data.user) {
+        setUser(data.user);
+      }
     } catch (error) {
       console.error('Failed to refresh user:', error);
     }
@@ -69,3 +82,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

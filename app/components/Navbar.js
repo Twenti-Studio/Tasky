@@ -59,6 +59,7 @@ export default function Navbar() {
               width={32}
               height={32}
               className="rounded-lg"
+              style={{ width: 'auto', height: 'auto' }}
             />
             <span className="text-lg font-bold text-[#042C71] hidden sm:block">Mita</span>
           </Link>

@@ -151,48 +151,75 @@ const bitlabsCallback = async (req, res) => {
 
 /**
  * Fetch available surveys from BitLabs
- * GET /api/bitlabs/surveys
+ * GET /api/callback/bitlabs/surveys
  */
 const getBitlabsSurveys = async (req, res) => {
   try {
     const userId = req.user.id;
-    const token = process.env.NEXT_PUBLIC_BITLABS_TOKEN || '3cbd4dde-42bf-4dfb-8463-58146b64cc51';
+    const token = process.env.BITLABS_TOKEN || process.env.NEXT_PUBLIC_BITLABS_TOKEN;
 
-    // BitLabs API endpoint to get surveys
-    const apiUrl = `https://api.bitlabs.ai/v2/surveys?uid=${userId}`;
+    if (!token) {
+      console.log('[BITLABS] No API token configured');
+      return res.json({
+        success: true,
+        surveys: [],
+        error: 'BitLabs not configured'
+      });
+    }
+
+    // BitLabs API v2 endpoint for surveys
+    // Docs: https://developer.bitlabs.ai/
+    const apiUrl = `https://api.bitlabs.ai/v2/client/surveys?uid=${encodeURIComponent(userId)}`;
 
     console.log(`[BITLABS] Fetching surveys for user ${userId}`);
+    console.log(`[BITLABS] API URL: ${apiUrl}`);
 
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
+        'Content-Type': 'application/json',
         'X-Api-Token': token,
       }
     });
 
-    if (!response.ok) {
-      console.error(`[BITLABS] API error: ${response.status} ${response.statusText}`);
+    const responseText = await response.text();
+    console.log(`[BITLABS] Response status: ${response.status}`);
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`[BITLABS] Failed to parse response:`, responseText.substring(0, 200));
       return res.json({
         success: true,
         surveys: [],
-        error: `API returned ${response.status}`
+        error: 'Invalid API response'
       });
     }
 
-    const data = await response.json();
+    if (!response.ok) {
+      console.error(`[BITLABS] API error: ${response.status}`, data);
+      return res.json({
+        success: true,
+        surveys: [],
+        error: data.error?.message || `API returned ${response.status}`
+      });
+    }
 
-    console.log(`[BITLABS] Retrieved ${data?.surveys?.length || 0} surveys`);
+    // BitLabs v2 response structure
+    const surveysData = data.data?.surveys || data.surveys || [];
+    console.log(`[BITLABS] Retrieved ${surveysData.length} surveys`);
 
     // Transform surveys to our format
-    const surveys = (data.surveys || []).map(survey => ({
-      id: survey.id,
-      category: survey.category || 'general',
-      loi: survey.loi, // Length of interview in minutes
-      reward: survey.value, // Reward in USD cents
-      points: Math.round(survey.value * 100), // Convert to points (1 cent = 100 points)
-      link: survey.link,
-      rating: survey.rating,
+    const surveys = surveysData.map(survey => ({
+      id: survey.id || survey.network_id,
+      category: survey.category?.name || 'general',
+      loi: survey.loi || survey.length_of_interview || 5, // Length of interview in minutes
+      reward: survey.value || survey.cpi, // Reward in USD cents
+      points: Math.round((survey.value || survey.cpi || 0) * 100), // Convert to points (1 cent = 100 points)
+      link: survey.link || survey.click_url,
+      rating: survey.rating || 4,
       tags: survey.tags || [],
       type: survey.type || 'survey',
     }));
@@ -214,4 +241,5 @@ const getBitlabsSurveys = async (req, res) => {
 };
 
 export { bitlabsCallback, getBitlabsSurveys };
+
 
