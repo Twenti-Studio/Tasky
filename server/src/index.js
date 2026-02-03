@@ -31,6 +31,7 @@ import authRoutes from './routes/auth.js';
 import callbackRoutes from './routes/callback.js';
 import monetagRoutes from './routes/monetag.js';
 import proxyRoutes from './routes/proxy.js';
+import reportRoutes from './routes/report.js';
 import userRoutes from './routes/user.js';
 
 // Import utilities
@@ -69,6 +70,7 @@ app.use('/api/monetag', monetagRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/callback', callbackRoutes);
 app.use('/api/proxy', proxyRoutes); // Proxy routes untuk offerwall
+app.use('/api/reports', reportRoutes); // Report routes
 
 console.log('Routes mounted OK');
 

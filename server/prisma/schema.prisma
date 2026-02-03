@@ -19,6 +19,8 @@ model User {
   balance   Float    @default(0)
   isAdmin   Boolean  @default(false)
   isActive  Boolean  @default(true)
+  emailVerified Boolean @default(false)
+  verificationToken String?
   
   // Bank account information
   bankMethod      String?  // "dana", "gopay", "ovo", etc
@@ -33,6 +35,7 @@ model User {
   earnings      Earning[]
   withdrawals   Withdrawal[]
   transactions  Transaction[]
+  reports       Report[]
 
   @@map("users")
 }
@@ -125,4 +128,28 @@ model ProviderConfig {
 
   @@map("provider_configs")
   @@unique([provider, taskType])
+}
+
+// Report/Complaint model
+model Report {
+  id          String    @id @default(uuid())
+  userId      String
+  subject     String
+  category    String    // "technical", "payment", "task", "other"
+  description String    @db.Text
+  status      String    @default("open") // "open", "in_progress", "resolved", "closed"
+  priority    String    @default("normal") // "low", "normal", "high", "urgent"
+  adminNote   String?   @db.Text
+  resolvedBy  String?   // Admin ID who resolved
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+  @@index([userId])
+  @@index([status])
+  @@index([category])
 }

@@ -41,6 +41,10 @@ router.get('/offerwall/:provider', async (req, res) => {
         targetUrl = `https://theoremreach.com/respondent_entry/direct?api_key=${process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID}&user_id=${user_id}&transaction_id=${Date.now()}`;
         providerName = 'TheoremReach';
         break;
+      case 'adgem':
+        targetUrl = `https://api.adgem.com/v1/wall?appid=${process.env.ADGEM_POSTBACK_KEY}&player_id=${user_id}`;
+        providerName = 'AdGem';
+        break;
       default:
         return res.status(404).json({ error: 'Provider not found' });
     }

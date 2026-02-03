@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 
 // Import controllers
+import { getAdGemUrl, handleAdGemCallback, testAdGemCallback } from '../controllers/adgemController.js';
 import { bitlabsCallback, getBitlabsSurveys } from '../controllers/bitlabsController.js';
 import { cpxCallback, getCpxUrl } from '../controllers/cpxController.js';
 import { genericCallback, getProviderUrl } from '../controllers/genericProviderController.js';
@@ -67,6 +68,14 @@ router.post('/theoremreach', sanitizeInput, simpleRateLimit(500, 60000), theorem
 router.get('/theoremreach/url', authenticate, getTheoremreachUrl);
 
 // ============================================
+// ADGEM (Offers & Surveys)
+// ============================================
+router.get('/adgem', sanitizeInput, simpleRateLimit(500, 60000), handleAdGemCallback);
+router.post('/adgem', sanitizeInput, simpleRateLimit(500, 60000), handleAdGemCallback);
+router.get('/adgem/url', authenticate, getAdGemUrl);
+router.get('/adgem/test', testAdGemCallback); // Development only
+
+// ============================================
 // GENERIC (Template for new providers)
 // ============================================
 router.get('/generic', sanitizeInput, simpleRateLimit(500, 60000), genericCallback);
@@ -89,6 +98,7 @@ router.get('/health', (req, res) => {
       lootably: 'active',
       revlum: 'active',
       theoremreach: 'active',
+      adgem: 'active',
     }
   });
 });
