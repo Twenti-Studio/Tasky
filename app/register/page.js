@@ -31,6 +31,9 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
     name: '',
+    bankMethod: 'dana',
+    bankAccountNumber: '',
+    bankAccountName: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,6 +60,11 @@ export default function RegisterPage() {
 
     if (formData.password.length < 6) {
       setError('Kata sandi minimal 6 karakter');
+      return;
+    }
+
+    if (!formData.bankAccountNumber || !formData.bankAccountName) {
+      setError('Data rekening/e-wallet harus diisi');
       return;
     }
 
@@ -247,6 +255,71 @@ export default function RegisterPage() {
                   >
                     {showConfirmPassword ? <EyeSlashIcon /> : <EyeIcon />}
                   </button>
+                </div>
+              </div>
+
+              {/* Bank Account Section */}
+              <div className="pt-4 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Data Penarikan
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Data ini diperlukan untuk proses penarikan saldo. Pastikan data yang Anda masukkan benar.
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="bankMethod" className="block text-sm font-medium text-gray-700 mb-1">
+                      Metode Penarikan
+                    </label>
+                    <select
+                      id="bankMethod"
+                      name="bankMethod"
+                      value={formData.bankMethod}
+                      onChange={handleChange}
+                      required
+                      className={inputStyles}
+                    >
+                      <option value="dana">DANA</option>
+                      <option value="gopay">GoPay</option>
+                      <option value="ovo">OVO</option>
+                      <option value="shopeepay">ShopeePay</option>
+                      <option value="linkaja">LinkAja</option>
+                      <option value="bank">Transfer Bank</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="bankAccountNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nomor Rekening/HP
+                    </label>
+                    <input
+                      type="text"
+                      id="bankAccountNumber"
+                      name="bankAccountNumber"
+                      value={formData.bankAccountNumber}
+                      onChange={handleChange}
+                      required
+                      className={inputStyles}
+                      placeholder={formData.bankMethod === 'bank' ? 'Nomor rekening' : 'Nomor HP'}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="bankAccountName" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nama Pemilik Akun
+                    </label>
+                    <input
+                      type="text"
+                      id="bankAccountName"
+                      name="bankAccountName"
+                      value={formData.bankAccountName}
+                      onChange={handleChange}
+                      required
+                      className={inputStyles}
+                      placeholder="Sesuai dengan akun e-wallet/bank"
+                    />
+                  </div>
                 </div>
               </div>
 

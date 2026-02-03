@@ -195,6 +195,7 @@ export default function TasksPage() {
       revlum: process.env.NEXT_PUBLIC_REVLUM_APP_ID && process.env.NEXT_PUBLIC_REVLUM_APP_ID !== 'your-revlum-app-id',
       bitlabs: process.env.NEXT_PUBLIC_BITLABS_TOKEN && process.env.NEXT_PUBLIC_BITLABS_TOKEN !== 'your-bitlabs-token',
       theoremreach: process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID && process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID !== 'your-theoremreach-app-id',
+      adgem: process.env.NEXT_PUBLIC_ADGEM_APP_ID && process.env.NEXT_PUBLIC_ADGEM_APP_ID !== 'your-adgem-app-id',
     };
     return keys[providerId] || false;
   };
@@ -333,6 +334,26 @@ export default function TasksPage() {
           pointsDisplay: 'Up to 10000 pts',
           isOfferwall: true,
           taskIcon: TrendingUp,
+        },
+      ],
+    },
+    {
+      id: 'adgem',
+      name: 'AdGem Offers',
+      category: 'offers',
+      icon: Gift,
+      color: 'bg-purple-600',
+      description: 'Diverse earning opportunities',
+      payout: '100-5000 pts',
+      tasks: [
+        {
+          id: 'offerwall',
+          name: 'Other Walls',
+          description: 'Surveys, apps, videos & more',
+          points: 0,
+          pointsDisplay: 'Up to 5000 pts',
+          isOfferwall: true,
+          taskIcon: Gift,
         },
       ],
     },
@@ -594,6 +615,7 @@ export default function TasksPage() {
       lootably: `https://wall.lootably.com/?placementID=${process.env.NEXT_PUBLIC_LOOTABLY_PLACEMENT_ID}&userID=${user.id}`,
       revlum: `https://revlum.com/offerwall/${process.env.NEXT_PUBLIC_REVLUM_APP_ID}?user_id=${user.id}`,
       theoremreach: `https://theoremreach.com/respondent_entry/direct?api_key=${process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID}&user_id=${user.id}&transaction_id=${Date.now()}`,
+      adgem: `https://api.adgem.com/v1/wall?appid=${process.env.NEXT_PUBLIC_ADGEM_APP_ID}&player_id=${user.id}`,
     };
 
     if (directUrls[provider]) {

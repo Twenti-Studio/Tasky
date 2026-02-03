@@ -55,7 +55,7 @@ export default function LandingNavbar() {
               <span className={`text-xl font-bold transition-colors duration-300 ${
                 scrolled ? 'text-[#042C71]' : 'text-white'
               }`}>
-                Mita
+                MiTa
               </span>
             </Link>
 

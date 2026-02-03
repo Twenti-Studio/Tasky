@@ -117,7 +117,7 @@ export default function Home() {
                       {/* Welcome */}
                       <div className="mb-4">
                         <h3 className="text-lg font-bold text-gray-900">Hi, User!</h3>
-                        <p className="text-xs text-gray-500">Welcome back to Mita</p>
+                        <p className="text-xs text-gray-500">Welcome back to MiTa</p>
                       </div>
                       
                       {/* Balance Card */}

@@ -197,6 +197,41 @@ class ApiClient {
   async getBitlabsSurveys() {
     return this.request('/callback/bitlabs/surveys');
   }
+
+  // Report endpoints
+  async createReport(reportData) {
+    return this.request('/reports', {
+      method: 'POST',
+      body: JSON.stringify(reportData),
+    });
+  }
+
+  async getUserReports() {
+    return this.request('/reports/my-reports');
+  }
+
+  async getReport(reportId) {
+    return this.request(`/reports/${reportId}`);
+  }
+
+  // Admin report endpoints
+  async getAllReports(filters = {}) {
+    const params = new URLSearchParams(filters);
+    return this.request(`/reports?${params}`);
+  }
+
+  async updateReportStatus(reportId, updates) {
+    return this.request(`/reports/${reportId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  async deleteReport(reportId) {
+    return this.request(`/reports/${reportId}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const api = new ApiClient();

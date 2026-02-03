@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
                         <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
                             <Shield className="text-white" size={32} />
                         </div>
-                        <h1 className="text-2xl font-bold text-white">Mita Admin</h1>
+                        <h1 className="text-2xl font-bold text-white">MiTa Admin</h1>
                         <p className="text-blue-100 text-sm mt-1">Authorized Personnel Only</p>
                     </div>
 

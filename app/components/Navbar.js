@@ -1,6 +1,6 @@
 'use client';
 
-import { Briefcase, History, Home, LogOut, Menu, Settings, Shield, User, Wallet, X } from 'lucide-react';
+import { AlertCircle, Briefcase, History, Home, LogOut, Menu, Settings, Shield, User, Wallet, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -35,6 +35,7 @@ export default function Navbar() {
       { href: '/admin', label: 'Dashboard', icon: Shield },
       { href: '/admin/users', label: 'Users', icon: User },
       { href: '/admin/withdrawals', label: 'Payouts', icon: Wallet },
+      { href: '/admin/reports', label: 'Laporan', icon: AlertCircle },
     ]
     : [
       // Regular users see earning features
@@ -42,6 +43,7 @@ export default function Navbar() {
       { href: '/tasks', label: 'Earn', icon: Briefcase },
       { href: '/withdraw', label: 'Withdraw', icon: Wallet },
       { href: '/history', label: 'History', icon: History },
+      { href: '/reports', label: 'Laporan', icon: AlertCircle },
       { href: '/settings', label: 'Settings', icon: Settings },
     ];
 
@@ -55,13 +57,13 @@ export default function Navbar() {
           <Link href="/dashboard" className="flex items-center gap-2">
             <Image
               src="/icon.png"
-              alt="Mita Logo"
+              alt="MiTa Logo"
               width={32}
               height={32}
               className="rounded-lg"
               style={{ width: 'auto', height: 'auto' }}
             />
-            <span className="text-lg font-bold text-[#042C71] hidden sm:block">Mita</span>
+            <span className="text-lg font-bold text-[#042C71] hidden sm:block">MiTa</span>
           </Link>
 
           {/* Desktop Navigation */}

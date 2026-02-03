@@ -21,12 +21,12 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-4">
               <Image 
                 src="/icon.png" 
-                alt="Mita" 
+                alt="MiTa" 
                 width={32} 
                 height={32}
                 className="rounded-lg"
               />
-              <span className="text-white text-lg font-bold">Mita</span>
+              <span className="text-white text-lg font-bold">MiTa</span>
             </div>
             <p className="text-sm leading-relaxed mb-4">
               Platform mikro task terpercaya di Indonesia. Dapatkan penghasilan tambahan dengan menyelesaikan tugas-tugas sederhana.
