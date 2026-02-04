@@ -5,13 +5,15 @@ const prisma = new PrismaClient();
 // Create new report
 export const createReport = async (req, res) => {
   try {
-    const { subject, category, description } = req.body;
+    const { subject, category, description, imageUrl } = req.body;
     const userId = req.user.id;
+
+    console.log('[CreateReport] Payload:', { subject, category, description, imageUrl, userId });
 
     // Validation
     if (!subject || !category || !description) {
-      return res.status(400).json({ 
-        error: 'Subject, category, and description are required' 
+      return res.status(400).json({
+        error: 'Subject, category, and description are required'
       });
     }
 
@@ -21,7 +23,8 @@ export const createReport = async (req, res) => {
         userId,
         subject,
         category,
-        description
+        description,
+        imageUrl: imageUrl || null
       },
       include: {
         user: {
@@ -112,11 +115,11 @@ export const getAllReports = async (req, res) => {
     const { status, category, priority, search } = req.query;
 
     const where = {};
-    
+
     if (status) where.status = status;
     if (category) where.category = category;
     if (priority) where.priority = priority;
-    
+
     if (search) {
       where.OR = [
         { subject: { contains: search, mode: 'insensitive' } },
@@ -150,7 +153,7 @@ export const getAllReports = async (req, res) => {
       _count: true
     });
 
-    res.json({ 
+    res.json({
       reports,
       stats: stats.reduce((acc, stat) => {
         acc[stat.status] = stat._count;
@@ -171,7 +174,7 @@ export const updateReportStatus = async (req, res) => {
     const adminId = req.user.id;
 
     const updateData = {};
-    
+
     if (status) {
       updateData.status = status;
       if (status === 'resolved' || status === 'closed') {
@@ -179,7 +182,7 @@ export const updateReportStatus = async (req, res) => {
         updateData.resolvedAt = new Date();
       }
     }
-    
+
     if (priority) updateData.priority = priority;
     if (adminNote !== undefined) updateData.adminNote = adminNote;
 

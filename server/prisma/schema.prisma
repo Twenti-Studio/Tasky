@@ -137,6 +137,7 @@ model Report {
   subject     String
   category    String    // "technical", "payment", "task", "other"
   description String    @db.Text
+  imageUrl    String?   // URL gambar bukti laporan
   status      String    @default("open") // "open", "in_progress", "resolved", "closed"
   priority    String    @default("normal") // "low", "normal", "high", "urgent"
   adminNote   String?   @db.Text
@@ -153,3 +154,4 @@ model Report {
   @@index([status])
   @@index([category])
 }
+

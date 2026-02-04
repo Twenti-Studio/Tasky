@@ -6,6 +6,7 @@ import { getAdGemUrl, handleAdGemCallback, testAdGemCallback } from '../controll
 import { bitlabsCallback, getBitlabsSurveys } from '../controllers/bitlabsController.js';
 import { cpxCallback, getCpxUrl } from '../controllers/cpxController.js';
 import { genericCallback, getProviderUrl } from '../controllers/genericProviderController.js';
+import { getKiwiwallOffers, getKiwiwallUrl, kiwiwallCallback } from '../controllers/kiwiwallController.js';
 import { lootablyCallback } from '../controllers/lootablyController.js';
 import { monetagCallback } from '../controllers/monetagController.js';
 import { revlumCallback } from '../controllers/revlumController.js';
@@ -76,6 +77,14 @@ router.get('/adgem/url', authenticate, getAdGemUrl);
 router.get('/adgem/test', testAdGemCallback); // Development only
 
 // ============================================
+// KIWIWALL (Offers & Rewards)
+// ============================================
+router.get('/kiwiwall', sanitizeInput, simpleRateLimit(500, 60000), kiwiwallCallback);
+router.post('/kiwiwall', sanitizeInput, simpleRateLimit(500, 60000), kiwiwallCallback);
+router.get('/kiwiwall/url', authenticate, getKiwiwallUrl);
+router.get('/kiwiwall/offers', authenticate, getKiwiwallOffers);
+
+// ============================================
 // GENERIC (Template for new providers)
 // ============================================
 router.get('/generic', sanitizeInput, simpleRateLimit(500, 60000), genericCallback);
@@ -99,6 +108,7 @@ router.get('/health', (req, res) => {
       revlum: 'active',
       theoremreach: 'active',
       adgem: 'active',
+      kiwiwall: 'active',
     }
   });
 });

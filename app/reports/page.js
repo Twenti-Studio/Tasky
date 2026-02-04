@@ -1,9 +1,8 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { AlertCircle, Camera, CheckCircle2, FileText, MessageSquare, Plus, Send, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
@@ -16,11 +15,15 @@ export default function ReportsPage() {
   const [formData, setFormData] = useState({
     subject: '',
     category: 'technical',
-    description: ''
+    description: '',
+    imageUrl: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -38,11 +41,59 @@ export default function ReportsPage() {
     try {
       setLoading(true);
       const response = await api.getUserReports();
-      setReports(response.reports);
+      setReports(response.reports || []);
     } catch (err) {
       console.error('Failed to fetch reports:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Hanya file gambar yang diperbolehkan (JPEG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Ukuran file terlalu besar (maksimal 5MB)');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError('');
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const result = await api.uploadImage(file);
+      setFormData(prev => ({ ...prev, imageUrl: result.imageUrl }));
+      setSuccess('Gambar berhasil diupload');
+    } catch (err) {
+      setError(err.message || 'Gagal mengupload gambar');
+      setPreviewImage(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData({ ...formData, imageUrl: '' });
+    setPreviewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -58,9 +109,11 @@ export default function ReportsPage() {
 
     try {
       setSubmitting(true);
+      console.log('Submitting report with data:', formData);
       await api.createReport(formData);
       setSuccess('Laporan berhasil dikirim!');
-      setFormData({ subject: '', category: 'technical', description: '' });
+      setFormData({ subject: '', category: 'technical', description: '', imageUrl: '' });
+      setPreviewImage(null);
       setShowForm(false);
       fetchReports();
     } catch (err) {
@@ -72,18 +125,16 @@ export default function ReportsPage() {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      open: { color: 'bg-blue-100 text-blue-800', label: 'Terbuka', icon: AlertCircle },
-      in_progress: { color: 'bg-yellow-100 text-yellow-800', label: 'Diproses', icon: Clock },
-      resolved: { color: 'bg-green-100 text-green-800', label: 'Selesai', icon: CheckCircle2 },
-      closed: { color: 'bg-gray-100 text-gray-800', label: 'Ditutup', icon: CheckCircle2 }
+      open: { color: 'bg-blue-100 text-blue-700 border border-blue-200', label: 'Terbuka' },
+      in_progress: { color: 'bg-amber-100 text-amber-700 border border-amber-200', label: 'Diproses' },
+      resolved: { color: 'bg-emerald-100 text-emerald-700 border border-emerald-200', label: 'Selesai' },
+      closed: { color: 'bg-slate-100 text-slate-700 border border-slate-200', label: 'Ditutup' }
     };
 
     const config = statusConfig[status] || statusConfig.open;
-    const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
-        <Icon className="w-4 h-4" />
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
         {config.label}
       </span>
     );
@@ -99,81 +150,109 @@ export default function ReportsPage() {
     return categories[category] || category;
   };
 
+  const getApiBaseUrl = () => {
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    return url.replace(/\/api$/, '');
+  };
+
   if (authLoading || loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#042C71] mx-auto"></div>
-              <p className="mt-4 text-gray-600">Memuat...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-[#042C71] mx-auto"></div>
+              <p className="mt-4 text-slate-600 font-medium">Memuat data...</p>
             </div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Laporan & Aduan</h1>
-          <p className="text-gray-600">Laporkan masalah atau sampaikan keluhan Anda</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Header Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#042C71] to-[#0a4da8] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <FileText className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">Laporan & Aduan</h1>
+                <p className="text-slate-500 text-sm mt-0.5">Sampaikan masalah atau keluhan Anda kepada kami</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 ${showForm
+                ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                : 'bg-gradient-to-r from-[#042C71] to-[#0a4da8] text-white hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5'
+                }`}
+            >
+              {showForm ? (
+                <>
+                  <X className="w-5 h-5" />
+                  Batal
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" />
+                  Buat Laporan
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-            {success}
+          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium">{success}</span>
           </div>
         )}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {error}
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
-        {/* Create Report Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-[#042C71] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#031f4d] transition"
-          >
-            {showForm ? 'Batal' : '+ Buat Laporan Baru'}
-          </button>
-        </div>
-
         {/* Report Form */}
         {showForm && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4">Buat Laporan Baru</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+              <div className="w-10 h-10 bg-[#CE4912]/10 rounded-lg flex items-center justify-center">
+                <Send className="w-5 h-5 text-[#CE4912]" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-800">Buat Laporan Baru</h2>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subjek
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Subjek Laporan
                 </label>
                 <input
                   type="text"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent"
-                  placeholder="Judul singkat masalah Anda"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-[#042C71]/20 focus:border-[#042C71] focus:bg-white transition-all duration-200"
+                  placeholder="Contoh: Poin tidak masuk setelah menyelesaikan tugas"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Kategori
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:ring-2 focus:ring-[#042C71]/20 focus:border-[#042C71] focus:bg-white transition-all duration-200 cursor-pointer"
                 >
                   <option value="technical">Teknis</option>
                   <option value="payment">Pembayaran</option>
@@ -183,31 +262,84 @@ export default function ReportsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Deskripsi Masalah
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent"
-                  placeholder="Jelaskan masalah Anda secara detail..."
+                  rows={5}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-[#042C71]/20 focus:border-[#042C71] focus:bg-white transition-all duration-200 resize-none"
+                  placeholder="Jelaskan masalah Anda secara detail. Sertakan informasi seperti waktu kejadian, langkah yang sudah dilakukan, dll."
                   required
                 />
               </div>
 
-              <div className="flex gap-3">
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Bukti Kendala (Opsional)
+                </label>
+                <div className="space-y-3">
+                  {previewImage || formData.imageUrl ? (
+                    <div className="relative inline-block">
+                      <img
+                        src={previewImage || `${getApiBaseUrl()}${formData.imageUrl}`}
+                        alt="Preview"
+                        className="max-w-full max-h-48 rounded-lg border border-slate-200 object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-[#042C71] hover:bg-slate-50 transition-all cursor-pointer"
+                    >
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Camera className="w-6 h-6 text-slate-400" />
+                      </div>
+                      <p className="text-slate-600 font-medium">
+                        {uploading ? 'Mengupload...' : 'Klik untuk upload gambar'}
+                      </p>
+                      <p className="text-sm text-slate-400 mt-1">
+                        JPEG, PNG, GIF, WEBP (Maks. 5MB)
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="bg-[#CE4912] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#b84010] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={submitting || uploading}
+                  className="flex items-center gap-2 bg-gradient-to-r from-[#CE4912] to-[#e55a1f] text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
                 >
+                  <Send className="w-5 h-5" />
                   {submitting ? 'Mengirim...' : 'Kirim Laporan'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
-                  className="px-6 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
+                  onClick={() => {
+                    setShowForm(false);
+                    setPreviewImage(null);
+                    setFormData({ subject: '', category: 'technical', description: '', imageUrl: '' });
+                  }}
+                  className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all duration-200"
                 >
                   Batal
                 </button>
@@ -219,28 +351,31 @@ export default function ReportsPage() {
         {/* Reports List */}
         <div className="space-y-4">
           {reports.length === 0 ? (
-            <div className="bg-white rounded-xl shadow p-12 text-center">
-              <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
+              <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <MessageSquare className="w-10 h-10 text-slate-300" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
                 Belum Ada Laporan
               </h3>
-              <p className="text-gray-600">
-                Anda belum pernah membuat laporan. Klik tombol di atas untuk membuat laporan baru.
+              <p className="text-slate-500 max-w-md mx-auto">
+                Anda belum memiliki laporan. Klik tombol &quot;Buat Laporan&quot; di atas untuk menyampaikan masalah atau keluhan.
               </p>
             </div>
           ) : (
             reports.map((report) => (
-              <div key={report.id} className="bg-white rounded-xl shadow hover:shadow-md transition p-6">
-                <div className="flex items-start justify-between mb-4">
+              <div key={report.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all duration-200 p-6">
+                <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-bold text-slate-800 mb-2">
                       {report.subject}
                     </h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <span className="px-2 py-1 bg-gray-100 rounded">
+                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg font-medium">
                         {getCategoryLabel(report.category)}
                       </span>
-                      <span>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-slate-500">
                         {new Date(report.createdAt).toLocaleDateString('id-ID', {
                           day: 'numeric',
                           month: 'long',
@@ -249,21 +384,35 @@ export default function ReportsPage() {
                       </span>
                     </div>
                   </div>
-                  <div>
+                  <div className="flex-shrink-0">
                     {getStatusBadge(report.status)}
                   </div>
                 </div>
 
-                <p className="text-gray-700 mb-4 whitespace-pre-wrap">
+                <p className="text-slate-600 mb-4 whitespace-pre-wrap leading-relaxed">
                   {report.description}
                 </p>
 
+                {/* Display uploaded image */}
+                {report.imageUrl && (
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-slate-600 mb-2">Bukti Kendala:</p>
+                    <img
+                      src={`${getApiBaseUrl()}${report.imageUrl}`}
+                      alt="Bukti kendala"
+                      className="max-w-full max-h-64 rounded-lg border border-slate-200 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => window.open(`${getApiBaseUrl()}${report.imageUrl}`, '_blank')}
+                    />
+                  </div>
+                )}
+
                 {report.adminNote && (
-                  <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
-                    <p className="text-sm font-semibold text-blue-900 mb-1">
-                      Tanggapan Admin:
+                  <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#042C71] rounded-r-xl">
+                    <p className="text-sm font-bold text-[#042C71] mb-1 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Tanggapan Admin
                     </p>
-                    <p className="text-sm text-blue-800">
+                    <p className="text-sm text-slate-700 leading-relaxed">
                       {report.adminNote}
                     </p>
                   </div>
@@ -273,6 +422,6 @@ export default function ReportsPage() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

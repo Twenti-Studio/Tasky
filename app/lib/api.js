@@ -232,6 +232,31 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Upload image
+  async uploadImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const headers = {};
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_URL}/upload/image`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Upload failed');
+    }
+
+    return response.json();
+  }
 }
 
 export const api = new ApiClient();

@@ -9,6 +9,7 @@ import {
   Eye,
   FileText,
   Gift,
+  Leaf,
   Lightbulb,
   PlayCircle,
   Rocket,
@@ -134,7 +135,7 @@ export default function TasksPage() {
     window.addEventListener('hashchange', preventTopNavigation);
     window.addEventListener('popstate', preventTopNavigation);
     window.addEventListener('message', handleMessage);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('hashchange', preventTopNavigation);
@@ -196,6 +197,7 @@ export default function TasksPage() {
       bitlabs: process.env.NEXT_PUBLIC_BITLABS_TOKEN && process.env.NEXT_PUBLIC_BITLABS_TOKEN !== 'your-bitlabs-token',
       theoremreach: process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID && process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID !== 'your-theoremreach-app-id',
       adgem: process.env.NEXT_PUBLIC_ADGEM_APP_ID && process.env.NEXT_PUBLIC_ADGEM_APP_ID !== 'your-adgem-app-id',
+      kiwiwall: process.env.NEXT_PUBLIC_KIWIWALL_APP_ID && process.env.NEXT_PUBLIC_KIWIWALL_APP_ID !== 'your-kiwiwall-app-id',
     };
     return keys[providerId] || false;
   };
@@ -354,6 +356,26 @@ export default function TasksPage() {
           pointsDisplay: 'Up to 5000 pts',
           isOfferwall: true,
           taskIcon: Gift,
+        },
+      ],
+    },
+    {
+      id: 'kiwiwall',
+      name: 'Kiwiwall Rewards',
+      category: 'offers',
+      icon: Leaf,
+      color: 'bg-green-600',
+      description: 'Complete offers & earn rewards',
+      payout: '100-10000 pts',
+      tasks: [
+        {
+          id: 'offerwall',
+          name: 'Reward Offers',
+          description: 'Install apps, complete tasks',
+          points: 0,
+          pointsDisplay: 'Up to 10000 pts',
+          isOfferwall: true,
+          taskIcon: Leaf,
         },
       ],
     },
@@ -616,30 +638,31 @@ export default function TasksPage() {
       revlum: `https://revlum.com/offerwall/${process.env.NEXT_PUBLIC_REVLUM_APP_ID}?user_id=${user.id}`,
       theoremreach: `https://theoremreach.com/respondent_entry/direct?api_key=${process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID}&user_id=${user.id}&transaction_id=${Date.now()}`,
       adgem: `https://api.adgem.com/v1/wall?appid=${process.env.NEXT_PUBLIC_ADGEM_APP_ID}&player_id=${user.id}`,
+      kiwiwall: `https://www.kiwiwall.com/wall/${process.env.NEXT_PUBLIC_KIWIWALL_APP_ID}/iframe?s1=${user.id}`,
     };
 
     if (directUrls[provider]) {
       // Try proxy endpoint first untuk maximum in-app experience
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const proxyUrl = `${backendUrl}/api/proxy/offerwall/${provider}?user_id=${user.id}`;
-      
+
       console.log(`[Tasks] Opening ${provider} via proxy:`, proxyUrl);
-      
+
       setIframeLoading(true);
       setIframeError(false);
       setIframeUrl(proxyUrl);
-      
+
       // Store direct URL untuk fallback
       window._directTaskUrl = directUrls[provider];
       window._currentProvider = provider;
-      
+
       // Set timeout untuk auto-fallback jika proxy gagal
       setTimeout(() => {
         if (iframeLoading) {
           console.warn('[Iframe] Taking too long to load via proxy');
         }
       }, 8000);
-      
+
       toast.info('Opening task wall via secure connection...', {
         title: 'Loading Task',
         duration: 2000,
@@ -663,16 +686,16 @@ export default function TasksPage() {
     const height = 800;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
-    
+
     const popup = window.open(
       url,
       'MitaTask',
       `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes,menubar=no,toolbar=no,location=no`
     );
-    
+
     if (popup) {
       setTaskWindow(popup);
-      
+
       // Monitor popup
       const checkPopup = setInterval(() => {
         if (popup.closed) {
@@ -686,7 +709,7 @@ export default function TasksPage() {
           });
         }
       }, 1000);
-      
+
       toast.success('Task opened in new window. Complete the task and close when done.', {
         title: 'Task Window Opened',
         duration: 4000,
@@ -900,7 +923,7 @@ export default function TasksPage() {
                   className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
                   title="Refresh Task"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
                 </button>
                 <button
                   onClick={() => {
@@ -937,7 +960,7 @@ export default function TasksPage() {
                   <div className="w-full h-full flex flex-col items-center justify-center bg-white p-8">
                     <div className="max-w-md text-center">
                       <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                       </div>
                       <h3 className="text-lg font-bold text-gray-800 mb-2">Silahkan Klik Button Buka di Window Baru</h3>
                       <p className="text-sm text-gray-600 mb-6">

@@ -15,6 +15,10 @@ export const getStats = async (req, res) => {
         const totalWithdrawals = await prisma.withdrawal.count().catch(() => 0);
         const pendingWithdrawals = await prisma.withdrawal.count({ where: { status: 'pending' } }).catch(() => 0);
 
+        // Reports - count open reports
+        const openReports = await prisma.report.count({ where: { status: 'open' } }).catch(() => 0);
+        const totalReports = await prisma.report.count().catch(() => 0);
+
         // Earnings might not exist yet
         const totalEarnings = await prisma.earning.aggregate({ _sum: { amount: true } }).catch(() => ({ _sum: { amount: 0 } }));
 
@@ -37,7 +41,9 @@ export const getStats = async (req, res) => {
                 inactiveUsers: totalUsers - activeUsers,
                 totalWithdrawals,
                 pendingWithdrawals,
-                totalEarnings: totalEarnings._sum.amount || 0
+                totalEarnings: totalEarnings._sum.amount || 0,
+                openReports,
+                totalReports
             },
             recentUsers
         });
@@ -51,7 +57,9 @@ export const getStats = async (req, res) => {
                 inactiveUsers: 0,
                 totalWithdrawals: 0,
                 pendingWithdrawals: 0,
-                totalEarnings: 0
+                totalEarnings: 0,
+                openReports: 0,
+                totalReports: 0
             },
             recentUsers: []
         });

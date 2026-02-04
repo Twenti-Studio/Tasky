@@ -8,18 +8,18 @@ import {
     updateReportStatus
 } from '../controllers/reportController.js';
 import { adminAuth } from '../middleware/adminAuth.js';
-import { auth } from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // User routes
-router.post('/', auth, createReport);
-router.get('/my-reports', auth, getUserReports);
-router.get('/:id', auth, getReport);
+router.post('/', authenticate, createReport);
+router.get('/my-reports', authenticate, getUserReports);
+router.get('/:id', authenticate, getReport);
 
 // Admin routes
-router.get('/', auth, adminAuth, getAllReports);
-router.patch('/:id', auth, adminAuth, updateReportStatus);
-router.delete('/:id', auth, adminAuth, deleteReport);
+router.get('/', authenticate, adminAuth, getAllReports);
+router.patch('/:id', authenticate, adminAuth, updateReportStatus);
+router.delete('/:id', authenticate, adminAuth, deleteReport);
 
 export default router;

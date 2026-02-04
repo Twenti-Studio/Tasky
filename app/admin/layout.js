@@ -6,6 +6,7 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
+    MessageSquare,
     Settings,
     Users,
     X
@@ -22,6 +23,7 @@ export default function AdminLayout({ children }) {
     const { user, loading, logout } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
+    const [openReports, setOpenReports] = useState(0);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -33,8 +35,9 @@ export default function AdminLayout({ children }) {
                 try {
                     const data = await api.getAdminStats();
                     setPendingWithdrawals(data.stats?.pendingWithdrawals || 0);
+                    setOpenReports(data.stats?.openReports || 0);
                 } catch (error) {
-                    console.error('Failed to fetch pending withdrawals:', error);
+                    console.error('Failed to fetch pending counts:', error);
                 }
             };
 
@@ -76,6 +79,12 @@ export default function AdminLayout({ children }) {
             label: 'Withdrawals',
             icon: CreditCard,
             badge: pendingWithdrawals > 0 ? pendingWithdrawals : null
+        },
+        {
+            href: '/admin/reports',
+            label: 'Reports',
+            icon: MessageSquare,
+            badge: openReports > 0 ? openReports : null
         },
         { href: '/admin/settings', label: 'Settings', icon: Settings },
     ];

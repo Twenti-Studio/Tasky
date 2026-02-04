@@ -32,6 +32,7 @@ import callbackRoutes from './routes/callback.js';
 import monetagRoutes from './routes/monetag.js';
 import proxyRoutes from './routes/proxy.js';
 import reportRoutes from './routes/report.js';
+import uploadRoutes from './routes/upload.js';
 import userRoutes from './routes/user.js';
 
 // Import utilities
@@ -71,6 +72,13 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/callback', callbackRoutes);
 app.use('/api/proxy', proxyRoutes); // Proxy routes untuk offerwall
 app.use('/api/reports', reportRoutes); // Report routes
+app.use('/api/upload', uploadRoutes); // Upload routes
+
+// Serve uploaded files statically
+import path from 'path';
+const __dirname = path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+console.log(`[Static] Serving uploads from: ${path.join(__dirname, 'uploads')}`);
 
 console.log('Routes mounted OK');
 

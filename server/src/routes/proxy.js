@@ -18,9 +18,9 @@ router.get('/offerwall/:provider', async (req, res) => {
   try {
     let targetUrl;
     let providerName;
-    
+
     // Build provider URLs dengan proper credentials
-    switch(provider) {
+    switch (provider) {
       case 'cpx':
         targetUrl = `https://offers.cpx-research.com/index.php?app_id=${process.env.NEXT_PUBLIC_CPX_APP_ID}&ext_user_id=${user_id}`;
         providerName = 'CPX Research';
@@ -44,6 +44,10 @@ router.get('/offerwall/:provider', async (req, res) => {
       case 'adgem':
         targetUrl = `https://api.adgem.com/v1/wall?appid=${process.env.ADGEM_POSTBACK_KEY}&player_id=${user_id}`;
         providerName = 'AdGem';
+        break;
+      case 'kiwiwall':
+        targetUrl = `https://www.kiwiwall.com/wall/${process.env.KIWIWALL_APP_ID}/iframe?s1=${user_id}`;
+        providerName = 'Kiwiwall';
         break;
       default:
         return res.status(404).json({ error: 'Provider not found' });
@@ -133,14 +137,14 @@ router.get('/offerwall/:provider', async (req, res) => {
     res.setHeader('X-Frame-Options', 'SAMEORIGIN'); // Allow dalam iframe aplikasi kita
     res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    
+
     res.send(html);
 
     console.log(`[Proxy] Successfully served ${providerName} content`);
 
   } catch (error) {
     console.error('[Proxy] Error fetching offerwall:', error.message);
-    
+
     // Fallback: Return HTML yang akan redirect ke URL asli
     // Ini untuk handle case dimana provider block server-side fetching
     const fallbackHtml = `
@@ -204,7 +208,7 @@ router.get('/offerwall/:provider', async (req, res) => {
         </body>
       </html>
     `;
-    
+
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.status(200).send(fallbackHtml);
   }
@@ -216,7 +220,7 @@ router.get('/offerwall/:provider', async (req, res) => {
  */
 router.get('/redirect', (req, res) => {
   const { url } = req.query;
-  
+
   if (!url) {
     return res.status(400).send('URL required');
   }
