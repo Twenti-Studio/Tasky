@@ -3,9 +3,9 @@
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
@@ -43,13 +43,11 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
-      // Schedule the async operation to run after the effect
       const timeoutId = setTimeout(() => {
         verifyEmail(token);
       }, 0);
       return () => clearTimeout(timeoutId);
     } else {
-      // Schedule the state update to run after the effect
       const timeoutId = setTimeout(() => {
         setStatus('error');
         setMessage('Token verifikasi tidak ditemukan');
@@ -110,6 +108,21 @@ export default function VerifyEmailPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-[#042C71] to-blue-900 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#042C71] mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium text-lg">Memuat...</p>
+        </div>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
 

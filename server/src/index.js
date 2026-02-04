@@ -10,7 +10,7 @@ import express from 'express';
 dotenv.config();
 
 console.log('=====================================');
-console.log('Mita SERVER STARTING');
+console.log('Mita SERVER STARTING (Prisma Client Updated)');
 console.log('=====================================');
 console.log('Time:', new Date().toISOString());
 console.log('Node:', process.version);

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { log } from '../utils/logger.js';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +9,7 @@ export const createReport = async (req, res) => {
     const { subject, category, description, imageUrl } = req.body;
     const userId = req.user.id;
 
-    console.log('[CreateReport] Payload:', { subject, category, description, imageUrl, userId });
+    log(`[CreateReport] Payload: ${JSON.stringify({ subject, category, description, imageUrl, userId })}`);
 
     // Validation
     if (!subject || !category || !description) {
@@ -37,6 +38,8 @@ export const createReport = async (req, res) => {
         }
       }
     });
+
+    log(`[CreateReport] Created in DB: ${report.id} with imageUrl: ${report.imageUrl}`);
 
     res.status(201).json({
       message: 'Report submitted successfully',

@@ -79,8 +79,9 @@ export default function ReportsPage() {
 
       // Upload to server
       const result = await api.uploadImage(file);
+      console.log('[UploadImage] Success, received URL:', result.imageUrl);
       setFormData(prev => ({ ...prev, imageUrl: result.imageUrl }));
-      setSuccess('Gambar berhasil diupload');
+      setSuccess('Gambar berhasil disiapkan. Silakan kirim laporan.');
     } catch (err) {
       setError(err.message || 'Gagal mengupload gambar');
       setPreviewImage(null);
@@ -90,7 +91,7 @@ export default function ReportsPage() {
   };
 
   const removeImage = () => {
-    setFormData({ ...formData, imageUrl: '' });
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
     setPreviewImage(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -109,8 +110,10 @@ export default function ReportsPage() {
 
     try {
       setSubmitting(true);
-      console.log('Submitting report with data:', formData);
-      await api.createReport(formData);
+      console.log('[SubmitReport] data:', formData);
+      const res = await api.createReport(formData);
+      console.log('[SubmitReport] Response:', res);
+
       setSuccess('Laporan berhasil dikirim!');
       setFormData({ subject: '', category: 'technical', description: '', imageUrl: '' });
       setPreviewImage(null);
