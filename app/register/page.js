@@ -37,6 +37,7 @@ export default function RegisterPage() {
     bankMethod: 'dana',
     bankAccountNumber: '',
     bankAccountName: '',
+    agreed: false,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,9 +45,10 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     });
     setError('');
   };
@@ -68,6 +70,11 @@ export default function RegisterPage() {
 
     if (!formData.bankAccountNumber || !formData.bankAccountName) {
       setError(t('register.bankDataRequired'));
+      return;
+    }
+
+    if (!formData.agreed) {
+      setError(t('register.mustAgree'));
       return;
     }
 
@@ -326,6 +333,33 @@ export default function RegisterPage() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Agreement Checkbox */}
+              <div className="flex items-start gap-3 py-2">
+                <input
+                  type="checkbox"
+                  id="agreed"
+                  name="agreed"
+                  checked={formData.agreed}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-[#042C71] border-gray-300 rounded focus:ring-[#042C71]"
+                />
+                <label htmlFor="agreed" className="text-sm text-gray-600 leading-tight">
+                  {t('register.agreeToTerms')
+                    .replace('{terms}', 'terms_placeholder')
+                    .replace('{privacy}', 'privacy_placeholder')
+                    .split(/terms_placeholder|privacy_placeholder/).map((part, i, arr) => {
+                      if (i === 0 && arr.length > 1) {
+                        return <span key={i}>{part}<Link href="/terms" className="text-[#042C71] font-medium hover:underline" target="_blank">{t('register.termsLink')}</Link></span>;
+                      }
+                      if (i === 1 && arr.length > 2) {
+                        return <span key={i}>{part}<Link href="/privacy" className="text-[#042C71] font-medium hover:underline" target="_blank">{t('register.privacyLink')}</Link></span>;
+                      }
+                      return <span key={i}>{part}</span>;
+                    })
+                  }
+                </label>
               </div>
 
               <button

@@ -160,6 +160,10 @@ const en = {
         accountNumberPlaceholder: 'Account number',
         accountHolderName: 'Account Holder Name',
         accountHolderPlaceholder: 'As registered on e-wallet/bank',
+        agreeToTerms: 'I agree to the {terms} and {privacy} that apply.',
+        termsLink: 'Terms of Service',
+        privacyLink: 'Privacy Policy',
+        mustAgree: 'You must agree to the Terms of Service and Privacy Policy',
     },
 
     // Dashboard

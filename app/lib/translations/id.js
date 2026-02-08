@@ -160,6 +160,10 @@ const id = {
         accountNumberPlaceholder: 'Nomor rekening',
         accountHolderName: 'Nama Pemilik Akun',
         accountHolderPlaceholder: 'Sesuai dengan akun e-wallet/bank',
+        agreeToTerms: 'Saya setuju dengan {terms} dan {privacy} yang berlaku.',
+        termsLink: 'Ketentuan Layanan',
+        privacyLink: 'Kebijakan Privasi',
+        mustAgree: 'Anda harus menyetujui Ketentuan Layanan dan Kebijakan Privasi',
     },
 
     // Dashboard
