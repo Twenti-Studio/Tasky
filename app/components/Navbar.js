@@ -6,9 +6,12 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,19 +35,19 @@ export default function Navbar() {
   const navLinks = user?.isAdmin
     ? [
       // Admin only sees admin panel
-      { href: '/admin', label: 'Dashboard', icon: Shield },
-      { href: '/admin/users', label: 'Users', icon: User },
-      { href: '/admin/withdrawals', label: 'Payouts', icon: Wallet },
-      { href: '/admin/reports', label: 'Laporan', icon: AlertCircle },
+      { href: '/admin', label: t('nav.dashboard'), icon: Shield },
+      { href: '/admin/users', label: t('nav.users'), icon: User },
+      { href: '/admin/withdrawals', label: t('nav.payouts'), icon: Wallet },
+      { href: '/admin/reports', label: t('nav.reports'), icon: AlertCircle },
     ]
     : [
       // Regular users see earning features
-      { href: '/dashboard', label: 'Home', icon: Home },
-      { href: '/tasks', label: 'Earn', icon: Briefcase },
-      { href: '/withdraw', label: 'Withdraw', icon: Wallet },
-      { href: '/history', label: 'History', icon: History },
-      { href: '/reports', label: 'Laporan', icon: AlertCircle },
-      { href: '/settings', label: 'Settings', icon: Settings },
+      { href: '/dashboard', label: t('nav.home'), icon: Home },
+      { href: '/tasks', label: t('nav.earn'), icon: Briefcase },
+      { href: '/withdraw', label: t('nav.withdraw'), icon: Wallet },
+      { href: '/history', label: t('nav.history'), icon: History },
+      { href: '/reports', label: t('nav.reports'), icon: AlertCircle },
+      { href: '/settings', label: t('nav.settings'), icon: Settings },
     ];
 
   const isActive = (href) => pathname === href;
@@ -86,11 +89,16 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right Side - Points & User */}
-          <div className="flex items-center gap-3">
+          {/* Right Side - Points, Language & User */}
+          <div className="flex items-center gap-2">
+            {/* Language Switcher (Desktop) */}
+            <div className="hidden md:block">
+              <LanguageSwitcher variant="compact" />
+            </div>
+
             {/* Points Badge */}
             <div className="bg-gradient-to-r from-[#042C71] to-blue-600 text-white px-3 py-1.5 rounded-full text-sm font-semibold">
-              {formatPoints(user?.balance || 0)} pts
+              {formatPoints(user?.balance || 0)} {t('common.pts')}
             </div>
 
             {/* User Menu (Desktop) */}
@@ -98,7 +106,7 @@ export default function Navbar() {
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                title="Logout"
+                title={t('nav.logout')}
               >
                 <LogOut size={18} />
               </button>
@@ -126,8 +134,14 @@ export default function Navbar() {
               </div>
               <div>
                 <p className="font-medium text-gray-800">{user?.username}</p>
-                <p className="text-xs text-gray-500">{formatPoints(user?.balance || 0)} points</p>
+                <p className="text-xs text-gray-500">{formatPoints(user?.balance || 0)} {t('common.points')}</p>
               </div>
+            </div>
+
+            {/* Language Switcher (Mobile) */}
+            <div className="mb-4">
+              <p className="text-xs font-medium text-gray-500 mb-2 px-1">{t('settings.language')}</p>
+              <LanguageSwitcher />
             </div>
 
             {/* Navigation Links */}
@@ -158,7 +172,7 @@ export default function Navbar() {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition mt-4"
             >
               <LogOut size={18} />
-              Logout
+              {t('nav.logout')}
             </button>
           </div>
         </div>
@@ -166,3 +180,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

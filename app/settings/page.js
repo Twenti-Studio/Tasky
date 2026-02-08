@@ -1,14 +1,17 @@
 'use client';
 
-import { CheckCircle, Lock, Save, User, Wallet } from 'lucide-react';
+import { CheckCircle, Globe, Lock, Save, User, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 
 export default function SettingsPage() {
     const router = useRouter();
     const { user, loading: authLoading, refreshUser } = useAuth();
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -54,9 +57,9 @@ export default function SettingsPage() {
         try {
             await api.updateProfile({ name, email });
             await refreshUser();
-            setSuccess('Profile updated successfully!');
+            setSuccess(t('settings.profileUpdated'));
         } catch (err) {
-            setError(err.message || 'Failed to update profile');
+            setError(err.message || t('settings.profileUpdateFailed'));
         } finally {
             setLoading(false);
         }
@@ -75,9 +78,9 @@ export default function SettingsPage() {
                 bankAccountName
             });
             await refreshUser();
-            setSuccess('Bank account details saved successfully!');
+            setSuccess(t('settings.bankAccountSaved'));
         } catch (err) {
-            setError(err.message || 'Failed to update bank account');
+            setError(err.message || t('settings.bankAccountFailed'));
         } finally {
             setLoading(false);
         }
@@ -89,12 +92,12 @@ export default function SettingsPage() {
         setSuccess('');
 
         if (newPassword !== confirmPassword) {
-            setError('New passwords do not match');
+            setError(t('settings.passwordsDoNotMatch'));
             return;
         }
 
         if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters');
+            setError(t('settings.passwordTooShort'));
             return;
         }
 
@@ -102,12 +105,12 @@ export default function SettingsPage() {
 
         try {
             await api.changePassword(currentPassword, newPassword);
-            setSuccess('Password changed successfully!');
+            setSuccess(t('settings.passwordChanged'));
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (err) {
-            setError(err.message || 'Failed to change password');
+            setError(err.message || t('settings.passwordChangeFailed'));
         } finally {
             setLoading(false);
         }
@@ -126,8 +129,8 @@ export default function SettingsPage() {
             <div className="max-w-2xl mx-auto px-4 py-6">
                 {/* Header */}
                 <div className="mb-6">
-                    <h1 className="text-xl font-bold text-gray-800">Settings</h1>
-                    <p className="text-sm text-gray-500">Manage your account settings</p>
+                    <h1 className="text-xl font-bold text-gray-800">{t('settings.title')}</h1>
+                    <p className="text-sm text-gray-500">{t('settings.subtitle')}</p>
                 </div>
 
                 {/* Tabs */}
@@ -140,7 +143,7 @@ export default function SettingsPage() {
                             }`}
                     >
                         <User size={18} />
-                        Profile
+                        {t('settings.profile')}
                     </button>
                     <button
                         onClick={() => setActiveTab('bank')}
@@ -150,7 +153,7 @@ export default function SettingsPage() {
                             }`}
                     >
                         <Wallet size={18} />
-                        Bank Account
+                        {t('settings.bankAccount')}
                     </button>
                     <button
                         onClick={() => setActiveTab('password')}
@@ -160,7 +163,17 @@ export default function SettingsPage() {
                             }`}
                     >
                         <Lock size={18} />
-                        Password
+                        {t('settings.password')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('language')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition whitespace-nowrap ${activeTab === 'language'
+                            ? 'bg-[#042C71] text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-[#042C71]'
+                            }`}
+                    >
+                        <Globe size={18} />
+                        {t('settings.language')}
                     </button>
                 </div>
 
@@ -180,35 +193,35 @@ export default function SettingsPage() {
                 {/* Profile Tab */}
                 {activeTab === 'profile' && (
                     <div className="bg-white rounded-xl border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Profile Information</h2>
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('settings.profileInfo')}</h2>
                         <form onSubmit={handleProfileUpdate} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.username')}</label>
                                 <input
                                     type="text"
                                     value={user?.username || ''}
                                     disabled
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                                 />
-                                <p className="text-xs text-gray-400 mt-1">Username cannot be changed</p>
+                                <p className="text-xs text-gray-400 mt-1">{t('settings.usernameCannotChange')}</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.fullName')}</label>
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="Your full name"
+                                    placeholder={t('settings.fullNamePlaceholder')}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.email')}</label>
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="your@email.com"
+                                    placeholder={t('settings.emailPlaceholder')}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
                                 />
                             </div>
@@ -218,7 +231,7 @@ export default function SettingsPage() {
                                 className="flex items-center gap-2 px-6 py-3 bg-[#042C71] text-white rounded-lg font-medium hover:bg-blue-800 transition disabled:opacity-50"
                             >
                                 <Save size={18} />
-                                {loading ? 'Saving...' : 'Save Changes'}
+                                {loading ? t('settings.saving') : t('settings.saveChanges')}
                             </button>
                         </form>
                     </div>
@@ -227,13 +240,13 @@ export default function SettingsPage() {
                 {/* Bank Account Tab */}
                 {activeTab === 'bank' && (
                     <div className="bg-white rounded-xl border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-2">Bank Account Details</h2>
-                        <p className="text-sm text-gray-500 mb-4">Add your bank account for withdrawals</p>
+                        <h2 className="text-lg font-semibold text-gray-800 mb-2">{t('settings.bankAccountDetails')}</h2>
+                        <p className="text-sm text-gray-500 mb-4">{t('settings.addBankAccount')}</p>
 
                         <form onSubmit={handleBankAccountUpdate} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Payment Method *
+                                    {t('settings.paymentMethod')}
                                 </label>
                                 <select
                                     value={bankMethod}
@@ -249,44 +262,44 @@ export default function SettingsPage() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {bankMethod === 'dana' || bankMethod === 'gopay' || bankMethod === 'ovo'
-                                        ? 'Phone Number *'
-                                        : 'Account Number *'}
+                                        ? t('settings.phoneNumber')
+                                        : t('settings.accountNumber')}
                                 </label>
                                 <input
                                     type="text"
                                     value={bankAccountNumber}
                                     onChange={(e) => setBankAccountNumber(e.target.value)}
-                                    placeholder={bankMethod === 'dana' ? '08xxxxxxxxxx' : 'Account number'}
+                                    placeholder={bankMethod === 'dana' ? '08xxxxxxxxxx' : t('settings.accountNumber')}
                                     required
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    {bankMethod === 'dana' && 'Enter your DANA registered phone number'}
-                                    {bankMethod === 'gopay' && 'Enter your GoPay registered phone number'}
-                                    {bankMethod === 'ovo' && 'Enter your OVO registered phone number'}
+                                    {bankMethod === 'dana' && t('settings.enterDANANumber')}
+                                    {bankMethod === 'gopay' && t('settings.enterGopayNumber')}
+                                    {bankMethod === 'ovo' && t('settings.enterOVONumber')}
                                 </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Account Holder Name *
+                                    {t('settings.accountHolderName')}
                                 </label>
                                 <input
                                     type="text"
                                     value={bankAccountName}
                                     onChange={(e) => setBankAccountName(e.target.value)}
-                                    placeholder="Name as registered"
+                                    placeholder={t('settings.nameAsRegistered')}
                                     required
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Must match the name registered on your {bankMethod.toUpperCase()} account
+                                    {t('settings.mustMatchName')} {bankMethod.toUpperCase()}
                                 </p>
                             </div>
 
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <p className="text-sm text-blue-700">
-                                    <strong>Important:</strong> Make sure your account details are correct. Withdrawals will be processed to this account.
+                                    <strong>{t('settings.importantBankInfo').split(':')[0]}:</strong> {t('settings.importantBankInfo').split(':')[1]}
                                 </p>
                             </div>
 
@@ -296,7 +309,7 @@ export default function SettingsPage() {
                                 className="flex items-center gap-2 px-6 py-3 bg-[#042C71] text-white rounded-lg font-medium hover:bg-blue-800 transition disabled:opacity-50"
                             >
                                 <Save size={18} />
-                                {loading ? 'Saving...' : 'Save Bank Account'}
+                                {loading ? t('settings.saving') : t('settings.saveBankAccount')}
                             </button>
                         </form>
                     </div>
@@ -305,38 +318,38 @@ export default function SettingsPage() {
                 {/* Password Tab */}
                 {activeTab === 'password' && (
                     <div className="bg-white rounded-xl border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Change Password</h2>
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('settings.changePassword')}</h2>
                         <form onSubmit={handlePasswordChange} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.currentPassword')}</label>
                                 <input
                                     type="password"
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
-                                    placeholder="Enter current password"
+                                    placeholder={t('settings.currentPasswordPlaceholder')}
                                     required
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.newPassword')}</label>
                                 <input
                                     type="password"
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
-                                    placeholder="Enter new password"
+                                    placeholder={t('settings.newPasswordPlaceholder')}
                                     required
                                     minLength={6}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.confirmNewPassword')}</label>
                                 <input
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Confirm new password"
+                                    placeholder={t('settings.confirmNewPasswordPlaceholder')}
                                     required
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71]"
                                 />
@@ -347,9 +360,19 @@ export default function SettingsPage() {
                                 className="flex items-center gap-2 px-6 py-3 bg-[#042C71] text-white rounded-lg font-medium hover:bg-blue-800 transition disabled:opacity-50"
                             >
                                 <Lock size={18} />
-                                {loading ? 'Changing...' : 'Change Password'}
+                                {loading ? t('settings.changing') : t('settings.changePassword')}
                             </button>
                         </form>
+                    </div>
+                )}
+
+                {/* Language Tab */}
+                {activeTab === 'language' && (
+                    <div className="bg-white rounded-xl border border-gray-200 p-6">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-2">{t('settings.language')}</h2>
+                        <p className="text-sm text-gray-500 mb-4">{t('settings.selectLanguage')}</p>
+
+                        <LanguageSwitcher />
                     </div>
                 )}
             </div>

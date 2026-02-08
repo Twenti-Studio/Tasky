@@ -4,8 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 // Eye icons for password visibility toggle
 const EyeIcon = () => (
@@ -25,6 +27,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const toast = useToast();
   const { register } = useAuth();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -54,17 +57,17 @@ export default function RegisterPage() {
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Kata sandi tidak sama');
+      setError(t('register.passwordsDoNotMatch'));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Kata sandi minimal 6 karakter');
+      setError(t('register.passwordTooShort'));
       return;
     }
 
     if (!formData.bankAccountNumber || !formData.bankAccountName) {
-      setError('Data rekening/e-wallet harus diisi');
+      setError(t('register.bankDataRequired'));
       return;
     }
 
@@ -73,13 +76,13 @@ export default function RegisterPage() {
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
-      toast.success('Silakan masuk dengan akun yang baru dibuat.', {
-        title: '✅ Pendaftaran Berhasil!',
+      toast.success(t('register.successMessage'), {
+        title: t('register.successTitle'),
         duration: 5000,
       });
       router.push('/login');
     } catch (err) {
-      setError(err.message || 'Pendaftaran gagal');
+      setError(err.message || t('register.registrationFailed'));
     } finally {
       setLoading(false);
     }
@@ -91,25 +94,26 @@ export default function RegisterPage() {
     <div className="min-h-screen flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#042C71] to-blue-900 p-12 flex-col justify-between">
-        <div>
+        <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <Image 
-              src="/icon.png" 
-              alt="Mita" 
-              width={48} 
+            <Image
+              src="/icon.png"
+              alt="Mita"
+              width={48}
               height={48}
               className="rounded-xl"
             />
             <span className="text-white text-2xl font-bold">Mita</span>
           </Link>
+          <LanguageSwitcher variant="compact" isLanding={true} />
         </div>
-        
+
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">
-            Mulai Perjalananmu<br />Bersama Mita
+            {t('register.heroTitle')}<br />{t('register.heroSubtitle')}
           </h1>
           <p className="text-blue-200 text-lg">
-            Daftar sekarang dan dapatkan penghasilan tambahan dari tugas-tugas sederhana.
+            {t('register.heroDescription')}
           </p>
           <div className="flex items-center gap-4 pt-4">
             <div className="flex -space-x-2">
@@ -117,34 +121,35 @@ export default function RegisterPage() {
               <div className="w-10 h-10 rounded-full bg-green-400 border-2 border-white flex items-center justify-center text-white text-sm font-medium">B</div>
               <div className="w-10 h-10 rounded-full bg-yellow-400 border-2 border-white flex items-center justify-center text-white text-sm font-medium">C</div>
             </div>
-            <p className="text-blue-200 text-sm">1.200+ pengguna sudah bergabung</p>
+            <p className="text-blue-200 text-sm">{t('register.usersJoined')}</p>
           </div>
         </div>
 
-        <p className="text-blue-300 text-sm">© 2025 Twenti Studio</p>
+        <p className="text-blue-300 text-sm">© 2026 Twenti Studio</p>
       </div>
 
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <Image 
-                src="/icon.png" 
-                alt="Mita" 
-                width={40} 
+          <div className="lg:hidden mb-8 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/icon.png"
+                alt="Mita"
+                width={40}
                 height={40}
                 className="rounded-lg"
               />
               <span className="text-[#042C71] text-xl font-bold">Mita</span>
             </Link>
+            <LanguageSwitcher variant="compact" />
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Buat Akun Baru</h2>
-              <p className="text-gray-600 mt-1">Isi data dibawah untuk mendaftar</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('register.createAccount')}</h2>
+              <p className="text-gray-600 mt-1">{t('register.subtitle')}</p>
             </div>
 
             {error && (
@@ -156,7 +161,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  {t('register.email')}
                 </label>
                 <input
                   type="email"
@@ -166,14 +171,14 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   required
                   className={inputStyles}
-                  placeholder="email@contoh.com"
+                  placeholder={t('register.emailPlaceholder')}
                   autoComplete="email"
                 />
               </div>
 
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
+                  {t('register.username')}
                 </label>
                 <input
                   type="text"
@@ -183,14 +188,14 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   required
                   className={inputStyles}
-                  placeholder="Pilih username"
+                  placeholder={t('register.usernamePlaceholder')}
                   autoComplete="username"
                 />
               </div>
 
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nama Lengkap <span className="text-gray-400">(opsional)</span>
+                  {t('register.fullName')} <span className="text-gray-400">({t('common.optional')})</span>
                 </label>
                 <input
                   type="text"
@@ -199,14 +204,14 @@ export default function RegisterPage() {
                   value={formData.name}
                   onChange={handleChange}
                   className={inputStyles}
-                  placeholder="Nama lengkap kamu"
+                  placeholder={t('register.fullNamePlaceholder')}
                   autoComplete="name"
                 />
               </div>
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Kata Sandi
+                  {t('register.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -217,7 +222,7 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     required
                     className={`${inputStyles} pr-12`}
-                    placeholder="Minimal 6 karakter"
+                    placeholder={t('register.passwordPlaceholder')}
                     autoComplete="new-password"
                   />
                   <button
@@ -233,7 +238,7 @@ export default function RegisterPage() {
 
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                  Konfirmasi Kata Sandi
+                  {t('register.confirmPassword')}
                 </label>
                 <div className="relative">
                   <input
@@ -244,7 +249,7 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     required
                     className={`${inputStyles} pr-12`}
-                    placeholder="Ulangi kata sandi"
+                    placeholder={t('register.confirmPasswordPlaceholder')}
                     autoComplete="new-password"
                   />
                   <button
@@ -261,16 +266,16 @@ export default function RegisterPage() {
               {/* Bank Account Section */}
               <div className="pt-4 border-t border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Data Penarikan
+                  {t('register.withdrawalData')}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Data ini diperlukan untuk proses penarikan saldo. Pastikan data yang Anda masukkan benar.
+                  {t('register.withdrawalDataDescription')}
                 </p>
 
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="bankMethod" className="block text-sm font-medium text-gray-700 mb-1">
-                      Metode Penarikan
+                      {t('register.withdrawalMethod')}
                     </label>
                     <select
                       id="bankMethod"
@@ -285,13 +290,13 @@ export default function RegisterPage() {
                       <option value="ovo">OVO</option>
                       <option value="shopeepay">ShopeePay</option>
                       <option value="linkaja">LinkAja</option>
-                      <option value="bank">Transfer Bank</option>
+                      <option value="bank">{t('register.bankTransfer')}</option>
                     </select>
                   </div>
 
                   <div>
                     <label htmlFor="bankAccountNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                      Nomor Rekening/HP
+                      {t('register.accountPhoneNumber')}
                     </label>
                     <input
                       type="text"
@@ -301,13 +306,13 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       required
                       className={inputStyles}
-                      placeholder={formData.bankMethod === 'bank' ? 'Nomor rekening' : 'Nomor HP'}
+                      placeholder={formData.bankMethod === 'bank' ? t('register.accountNumberPlaceholder') : t('register.phoneNumberPlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="bankAccountName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Nama Pemilik Akun
+                      {t('register.accountHolderName')}
                     </label>
                     <input
                       type="text"
@@ -317,7 +322,7 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       required
                       className={inputStyles}
-                      placeholder="Sesuai dengan akun e-wallet/bank"
+                      placeholder={t('register.accountHolderPlaceholder')}
                     />
                   </div>
                 </div>
@@ -328,22 +333,22 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="w-full bg-[#CE4912] text-white py-3 rounded-lg font-semibold hover:bg-[#b84010] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Membuat akun...' : 'Daftar Sekarang'}
+                {loading ? t('register.processing') : t('register.registerButton')}
               </button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-gray-600">
-                Sudah punya akun?{' '}
+                {t('register.haveAccount')}{' '}
                 <Link href="/login" className="text-[#042C71] font-semibold hover:underline">
-                  Masuk disini
+                  {t('register.loginNow')}
                 </Link>
               </p>
             </div>
 
             <div className="mt-4 text-center">
               <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-                ← Kembali ke Beranda
+                {t('register.backToHome')}
               </Link>
             </div>
           </div>

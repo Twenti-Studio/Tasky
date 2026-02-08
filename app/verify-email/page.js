@@ -125,13 +125,3 @@ export default function VerifyEmailPage() {
     </Suspense>
   );
 }
-
-
-// NEXT TASK
-// Add this env to railway
-// SMTP_HOST=smtp.gmail.com
-// SMTP_PORT=587
-// SMTP_SECURE=false
-// SMTP_USER=your-email@gmail.com
-// SMTP_PASS=your-app-password
-// SMTP_FROM=Mita <noreply@mita.app>

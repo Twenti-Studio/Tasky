@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 const StatCard = ({ end, label, duration = 2000, suffix = '' }) => {
   const [count, setCount] = useState(0);
@@ -38,9 +39,9 @@ const StatCard = ({ end, label, duration = 2000, suffix = '' }) => {
       if (!startTime) startTime = timestamp;
       const progress = timestamp - startTime;
       const percentage = Math.min(progress / duration, 1);
-      
+
       setCount(Math.floor(percentage * end));
-      
+
       if (percentage < 1) {
         requestAnimationFrame(step);
       }
@@ -62,10 +63,12 @@ const StatCard = ({ end, label, duration = 2000, suffix = '' }) => {
 };
 
 export default function StatsSection() {
+  const { t } = useLanguage();
+
   const stats = [
-    { end: 100, label: 'Pengguna Aktif', suffix: '+' },
-    { end: 1000, label: 'Tugas Selesai', suffix: '+' },
-    { end: 95, label: 'Tingkat Kepuasan', suffix: '%' }
+    { end: 100, label: t('landing.statsActiveUsers'), suffix: '+' },
+    { end: 1000, label: t('landing.statsTasksCompleted'), suffix: '+' },
+    { end: 95, label: t('landing.statsSatisfaction'), suffix: '%' }
   ];
 
   return (

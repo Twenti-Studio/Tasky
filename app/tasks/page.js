@@ -25,11 +25,13 @@ import Script from 'next/script';
 import { useEffect, useState } from 'react';
 import { useToast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 
 export default function TasksPage() {
   const router = useRouter();
   const toast = useToast();
+  const { t } = useLanguage();
   const { user, loading: authLoading, refreshUser } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
   const [completedTasks, setCompletedTasks] = useState(new Set());
@@ -448,11 +450,11 @@ export default function TasksPage() {
 
   // Clean professional category labels with icons
   const categories = [
-    { id: 'all', label: 'All', icon: Target },
-    { id: 'ads', label: 'Quick Earn', icon: Zap },
-    { id: 'surveys', label: 'Surveys', icon: Search },
-    { id: 'tasks', label: 'Tasks', icon: Clock },
-    { id: 'offers', label: 'Offers', icon: Gift },
+    { id: 'all', label: t('tasks.all'), icon: Target },
+    { id: 'ads', label: t('tasks.quickEarn'), icon: Zap },
+    { id: 'surveys', label: t('tasks.surveys'), icon: Search },
+    { id: 'tasks', label: t('nav.tasks'), icon: Clock },
+    { id: 'offers', label: t('tasks.offers'), icon: Gift },
   ];
 
   // Create a flat list of all tasks from all providers
@@ -643,8 +645,10 @@ export default function TasksPage() {
 
     if (directUrls[provider]) {
       // Try proxy endpoint first untuk maximum in-app experience
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const proxyUrl = `${backendUrl}/api/proxy/offerwall/${provider}?user_id=${user.id}`;
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      // Pastikan tidak ada double /api jika backendUrl sudah mengandung /api
+      const baseApiUrl = backendUrl.endsWith('/api') ? backendUrl : `${backendUrl}/api`;
+      const proxyUrl = `${baseApiUrl}/proxy/offerwall/${provider}?user_id=${user.id}`;
 
       console.log(`[Tasks] Opening ${provider} via proxy:`, proxyUrl);
 
@@ -737,8 +741,8 @@ export default function TasksPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-2xl mx-auto px-4 py-6">
           <div className="mb-6">
-            <h1 className="text-xl font-bold text-gray-800">Earn Points</h1>
-            <p className="text-sm text-gray-500">Complete tasks to earn rewards</p>
+            <h1 className="text-xl font-bold text-gray-800">{t('tasks.title')}</h1>
+            <p className="text-sm text-gray-500">{t('tasks.subtitle')}</p>
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
@@ -764,7 +768,7 @@ export default function TasksPage() {
             <div className="flex items-start gap-2">
               <Lightbulb size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-blue-800">
-                Daily tasks reset at midnight. Complete all available tasks each day for maximum earnings.
+                {t('tasks.dailyTip')}
               </p>
             </div>
           </div>
@@ -772,7 +776,7 @@ export default function TasksPage() {
           {loadingSurveys && (
             <div className="bg-white border border-gray-200 rounded-xl p-6 text-center mb-6">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-500">Checking for new tasks...</p>
+              <p className="text-sm text-gray-500">{t('tasks.checkingTasks')}</p>
             </div>
           )}
 
@@ -788,10 +792,10 @@ export default function TasksPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-800">{group.label}</h3>
-                        <p className="text-xs text-gray-500">Pilih tugas yang tersedia di bawah ini</p>
+                        <p className="text-xs text-gray-500">{t('tasks.selectTaskBelow')}</p>
                       </div>
                       <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                        {group.tasks.length} Tersedia
+                        {group.tasks.length} {t('tasks.available')}
                       </span>
                     </div>
                   </div>
@@ -847,14 +851,14 @@ export default function TasksPage() {
                             {isCompletedToday && isDailyMission ? (
                               <span className="flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full">
                                 <CheckCircle size={12} />
-                                Done
+                                {t('tasks.completed')}
                               </span>
                             ) : isCompleted ? (
                               <span className="flex items-center gap-1 text-sm text-green-600 font-medium">
                                 <CheckCircle size={16} />
                               </span>
                             ) : isProcessing ? (
-                              <span className="text-xs text-gray-500 animate-pulse">Loading...</span>
+                              <span className="text-xs text-gray-500 animate-pulse">{t('common.loading')}</span>
                             ) : (
                               <>
                                 <span className="text-sm font-semibold text-[#042C71]">{task.pointsDisplay}</span>
@@ -873,21 +877,21 @@ export default function TasksPage() {
 
           {finalDisplay.length === 0 && !loadingSurveys && (
             <div className="bg-white border border-gray-200 rounded-xl p-8 text-center mt-4">
-              <p className="text-gray-500">No tasks currently available in this category.</p>
+              <p className="text-gray-500">{t('tasks.noTasksInCategory')}</p>
               <button
                 onClick={() => setActiveCategory('all')}
                 className="text-blue-600 font-medium mt-2 hover:underline"
               >
-                Show all categories
+                {t('tasks.showAllCategories')}
               </button>
             </div>
           )}
 
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-400">
-              Rewards are subject to verification by providers.
+              {t('tasks.rewardsVerification')}
               <br />
-              Need help? Contact support via the settings page.
+              {t('tasks.needHelp')}
             </p>
           </div>
         </div>

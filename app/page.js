@@ -7,9 +7,11 @@ import FeatureSection from "./components/FeatureSection";
 import LandingNavbar from "./components/LandingNavbar";
 import StatsSection from "./components/StatsSection";
 import TestimonialSection from "./components/TestimonialSection";
+import { useLanguage } from "./context/LanguageContext";
 
 export default function Home() {
   const observerRef = useRef(null);
+  const { t } = useLanguage();
 
   // Scroll reveal animation
   useEffect(() => {
@@ -42,49 +44,49 @@ export default function Home() {
         <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-blob" />
         <div className="absolute bottom-10 left-10 w-64 h-64 bg-[#CE4912]/10 rounded-full blur-3xl animate-blob-delay-2" />
         <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-blue-400/10 rounded-full blur-3xl animate-blob-delay-4" />
-        
+
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="animate-fade-in-up">
               <p className="text-blue-300 text-sm font-medium mb-4 tracking-wide">
-                Platform Mikro Task Terpercaya di Indonesia
+                {t('landing.heroSubtitle')}
               </p>
-              
+
               <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-                Dapatkan Penghasilan dari
-                <span className="text-gradient-animate"> Tugas Sederhana</span>
+                {t('landing.heroTitle')}
+                <span className="text-gradient-animate"> {t('landing.heroTitleHighlight')}</span>
               </h1>
-              
+
               <p className="text-blue-100 text-lg mb-8 leading-relaxed opacity-0 animate-fade-in-up delay-200" style={{ animationFillMode: 'forwards' }}>
-                Selesaikan survei, tonton iklan, dan kerjakan tugas-tugas simpel untuk mendapatkan poin yang bisa ditukar ke saldo e-wallet favoritmu.
+                {t('landing.heroDescription')}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up delay-300" style={{ animationFillMode: 'forwards' }}>
-                <Link 
+                <Link
                   href="/register"
                   className="px-8 py-3 bg-[#CE4912] hover:bg-[#b84010] text-white font-semibold rounded-lg transition-all text-center cta-pulse shine-effect btn-press"
                 >
-                  Mulai Sekarang
+                  {t('landing.startNow')}
                 </Link>
-                <Link 
+                <Link
                   href="/login"
                   className="px-8 py-3 border border-white/30 hover:bg-white/10 hover:border-white/50 text-white font-semibold rounded-lg transition-all text-center btn-press"
                 >
-                  Sudah Punya Akun
+                  {t('landing.haveAccount')}
                 </Link>
               </div>
-              
+
               {/* Simple Trust Points */}
               <div className="flex flex-wrap gap-6 mt-10 text-sm text-blue-200 stagger-fade-in">
                 <span className="flex items-center gap-2">
-                  <span className="text-green-400">✓</span> Gratis Selamanya
+                  <span className="text-green-400">✓</span> {t('landing.freeForever')}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-green-400">✓</span> Pencairan Cepat
+                  <span className="text-green-400">✓</span> {t('landing.fastWithdrawal')}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-green-400">✓</span> Tanpa Biaya Tersembunyi
+                  <span className="text-green-400">✓</span> {t('landing.noHiddenFees')}
                 </span>
               </div>
             </div>
@@ -103,7 +105,7 @@ export default function Home() {
                         <div className="w-4 h-2 bg-gray-600 rounded-sm"></div>
                       </div>
                     </div>
-                    
+
                     {/* App Content */}
                     <div className="bg-white px-4 py-3">
                       {/* Header */}
@@ -113,56 +115,56 @@ export default function Home() {
                           5,000 pts
                         </div>
                       </div>
-                      
+
                       {/* Welcome */}
                       <div className="mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Hi, User!</h3>
-                        <p className="text-xs text-gray-500">Welcome back to MiTa</p>
+                        <h3 className="text-lg font-bold text-gray-900">{t('dashboard.welcome')}, User!</h3>
+                        <p className="text-xs text-gray-500">{t('dashboard.welcomeBack')}</p>
                       </div>
-                      
+
                       {/* Balance Card */}
                       <div className="bg-gradient-to-br from-[#042C71] to-blue-700 rounded-2xl p-4 mb-4 shine-effect">
-                        <p className="text-blue-200 text-xs mb-1">Your Balance</p>
+                        <p className="text-blue-200 text-xs mb-1">{t('dashboard.yourBalance')}</p>
                         <p className="text-3xl font-bold text-white">5,000</p>
-                        <p className="text-blue-200 text-xs">points</p>
+                        <p className="text-blue-200 text-xs">{t('common.points')}</p>
                       </div>
-                      
+
                       {/* Quick Actions */}
                       <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 card-hover cursor-pointer">
                           <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
                             <span className="text-orange-500 text-sm">📋</span>
                           </div>
-                          <p className="text-xs font-medium text-gray-900">Earn Points</p>
-                          <p className="text-[10px] text-gray-400">Complete tasks</p>
+                          <p className="text-xs font-medium text-gray-900">{t('dashboard.earnPoints')}</p>
+                          <p className="text-[10px] text-gray-400">{t('dashboard.completeTasks')}</p>
                         </div>
                         <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 card-hover cursor-pointer">
                           <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mb-2">
                             <span className="text-green-500 text-sm">💳</span>
                           </div>
-                          <p className="text-xs font-medium text-gray-900">Withdraw</p>
-                          <p className="text-[10px] text-gray-400">Cash out points</p>
+                          <p className="text-xs font-medium text-gray-900">{t('nav.withdraw')}</p>
+                          <p className="text-[10px] text-gray-400">{t('dashboard.cashOutPoints')}</p>
                         </div>
                       </div>
-                      
+
                       {/* Stats */}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                           <p className="text-lg font-bold text-[#042C71]">239</p>
-                          <p className="text-[10px] text-gray-400">Total Earned</p>
+                          <p className="text-[10px] text-gray-400">{t('dashboard.totalEarned')}</p>
                         </div>
                         <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                           <p className="text-lg font-bold text-green-500">8</p>
-                          <p className="text-[10px] text-gray-400">Tasks Done</p>
+                          <p className="text-[10px] text-gray-400">{t('dashboard.tasksDone')}</p>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Notch */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-7 bg-gray-800 rounded-b-2xl"></div>
                 </div>
-                
+
                 {/* Decorative elements */}
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#CE4912]/20 rounded-full blur-2xl animate-blob"></div>
                 <div className="absolute -top-6 -right-6 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl animate-blob-delay-2"></div>
@@ -194,22 +196,22 @@ export default function Home() {
           <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-blob"></div>
           <div className="absolute bottom-10 right-10 w-40 h-40 bg-[#CE4912]/10 rounded-full blur-2xl animate-blob-delay-2"></div>
         </div>
-        
+
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Siap untuk Mulai Menghasilkan?
+            {t('landing.readyToEarn')}
           </h2>
           <p className="text-blue-100 mb-8">
-            Bergabung dengan ribuan pengguna yang sudah mendapatkan penghasilan tambahan setiap hari
+            {t('landing.joinThousands')}
           </p>
-          <Link 
+          <Link
             href="/register"
             className="inline-block px-10 py-4 bg-[#CE4912] hover:bg-[#b84010] text-white font-semibold rounded-lg transition-all cta-pulse shine-effect btn-press"
           >
-            Buat Akun Gratis
+            {t('landing.createFreeAccount')}
           </Link>
           <p className="mt-4 text-sm text-blue-300">
-            Tidak perlu kartu kredit • Mulai dalam hitungan menit
+            {t('landing.noCreditCard')}
           </p>
         </div>
       </section>

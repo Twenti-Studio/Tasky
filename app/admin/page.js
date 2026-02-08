@@ -3,18 +3,23 @@
 import {
     Clock,
     CreditCard,
+    Globe,
     TrendingUp,
     UserCheck,
     Users,
     UserX
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 
 export default function AdminDashboard() {
+    const { t, language } = useLanguage();
     const [stats, setStats] = useState(null);
     const [recentUsers, setRecentUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showLanguage, setShowLanguage] = useState(false);
 
     useEffect(() => {
         fetchStats();
@@ -46,39 +51,39 @@ export default function AdminDashboard() {
 
     const statCards = [
         {
-            label: 'Total Users',
+            label: t('admin.totalUsers'),
             value: stats?.totalUsers || 0,
             icon: Users,
             color: 'bg-blue-500',
         },
         {
-            label: 'Active Users',
+            label: t('admin.activeUsers'),
             value: stats?.activeUsers || 0,
             icon: UserCheck,
             color: 'bg-green-500',
         },
         {
-            label: 'Inactive Users',
+            label: t('admin.inactiveUsers'),
             value: stats?.inactiveUsers || 0,
             icon: UserX,
             color: 'bg-red-500',
         },
         {
-            label: 'Pending Withdrawals',
+            label: t('admin.pendingWithdrawals'),
             value: stats?.pendingWithdrawals || 0,
             icon: Clock,
             color: 'bg-orange-500',
             hasNotification: (stats?.pendingWithdrawals || 0) > 0,
-            notificationText: 'Needs attention!'
+            notificationText: t('admin.needsAttention')
         },
         {
-            label: 'Total Withdrawals',
+            label: t('admin.totalWithdrawals'),
             value: stats?.totalWithdrawals || 0,
             icon: CreditCard,
             color: 'bg-purple-500',
         },
         {
-            label: 'Total Points Earned',
+            label: t('admin.totalPointsEarned'),
             value: formatNumber(stats?.totalEarnings || 0),
             icon: TrendingUp,
             color: 'bg-teal-500',
@@ -87,7 +92,29 @@ export default function AdminDashboard() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+            {/* Header with Language Switcher */}
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">{t('admin.dashboard')}</h1>
+                <button
+                    onClick={() => setShowLanguage(!showLanguage)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:border-[#042C71] transition text-sm"
+                    title={t('settings.selectLanguage')}
+                >
+                    <Globe size={16} className="text-gray-500" />
+                    <span className="text-gray-700">{language === 'id' ? '🇮🇩 ID' : '🇺🇸 EN'}</span>
+                </button>
+            </div>
+
+            {/* Language Switcher Dropdown */}
+            {showLanguage && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 shadow-sm max-w-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Globe size={18} className="text-[#042C71]" />
+                        <h3 className="font-semibold text-gray-800">{t('settings.language')}</h3>
+                    </div>
+                    <LanguageSwitcher />
+                </div>
+            )}
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -122,14 +149,14 @@ export default function AdminDashboard() {
 
             {/* Recent Users */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Users</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('admin.recentUsers')}</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-gray-200">
-                                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Username</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Balance</th>
-                                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Joined</th>
+                                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">{t('admin.username')}</th>
+                                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">{t('admin.balance')}</th>
+                                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">{t('admin.joined')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -139,11 +166,11 @@ export default function AdminDashboard() {
                                         <span className="font-medium text-gray-800">{user.username}</span>
                                     </td>
                                     <td className="py-3 px-4">
-                                        <span className="text-gray-600">{formatNumber(user.balance)} pts</span>
+                                        <span className="text-gray-600">{formatNumber(user.balance)} {t('common.pts')}</span>
                                     </td>
                                     <td className="py-3 px-4">
                                         <span className="text-gray-500 text-sm">
-                                            {new Date(user.createdAt).toLocaleDateString('id-ID')}
+                                            {new Date(user.createdAt).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
                                         </span>
                                     </td>
                                 </tr>

@@ -4,11 +4,13 @@ import { ArrowDownLeft, ArrowUpRight, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 
 export default function HistoryPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { t, language } = useLanguage();
   const [earnings, setEarnings] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,8 @@ export default function HistoryPage() {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('id-ID', {
+    const locale = language === 'id' ? 'id-ID' : 'en-US';
+    return new Date(date).toLocaleDateString(locale, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -70,6 +73,16 @@ export default function HistoryPage() {
     }
   };
 
+  const getStatusLabel = (status) => {
+    const labels = {
+      completed: t('history.statusCompleted'),
+      pending: t('history.statusPending'),
+      processing: t('history.statusProcessing'),
+      rejected: t('history.statusRejected'),
+    };
+    return labels[status] || status;
+  };
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -83,8 +96,8 @@ export default function HistoryPage() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-gray-800">History</h1>
-          <p className="text-sm text-gray-500">Your earnings and withdrawals</p>
+          <h1 className="text-xl font-bold text-gray-800">{t('history.title')}</h1>
+          <p className="text-sm text-gray-500">{t('history.subtitle')}</p>
         </div>
 
         {/* Tabs */}
@@ -92,20 +105,20 @@ export default function HistoryPage() {
           <button
             onClick={() => setActiveTab('earnings')}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${activeTab === 'earnings'
-                ? 'bg-[#042C71] text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'bg-[#042C71] text-white'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
-            Earnings
+            {t('history.earnings')}
           </button>
           <button
             onClick={() => setActiveTab('withdrawals')}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${activeTab === 'withdrawals'
-                ? 'bg-[#042C71] text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'bg-[#042C71] text-white'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
-            Withdrawals
+            {t('history.withdrawals')}
           </button>
         </div>
 
@@ -123,8 +136,8 @@ export default function HistoryPage() {
           earnings.length === 0 ? (
             <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
               <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">No earnings yet</p>
-              <p className="text-sm text-gray-400 mt-1">Complete tasks to start earning</p>
+              <p className="text-gray-500">{t('history.noEarnings')}</p>
+              <p className="text-sm text-gray-400 mt-1">{t('history.startEarning')}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -155,8 +168,8 @@ export default function HistoryPage() {
         ) : withdrawals.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
             <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No withdrawals yet</p>
-            <p className="text-sm text-gray-400 mt-1">Your withdrawal history will appear here</p>
+            <p className="text-gray-500">{t('history.noWithdrawals')}</p>
+            <p className="text-sm text-gray-400 mt-1">{t('history.withdrawalHistoryAppear')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -171,11 +184,11 @@ export default function HistoryPage() {
                       <ArrowUpRight className="text-orange-600" size={16} />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">Withdrawal to {withdrawal.method}</p>
+                      <p className="font-medium text-gray-800">{t('history.withdrawalTo')} {withdrawal.method}</p>
                       <p className="text-xs text-gray-500 mt-1">{formatDate(withdrawal.createdAt)}</p>
                       <p className="text-xs text-gray-500">{withdrawal.accountNumber}</p>
                       <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded ${getStatusColor(withdrawal.status)}`}>
-                        {withdrawal.status}
+                        {getStatusLabel(withdrawal.status)}
                       </span>
                     </div>
                   </div>

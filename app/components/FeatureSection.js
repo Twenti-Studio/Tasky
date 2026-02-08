@@ -1,10 +1,11 @@
 'use client';
 
 import { ClipboardList, Wallet, Zap } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const FeatureCard = ({ icon: Icon, title, description, index }) => {
   return (
-    <div 
+    <div
       className="p-6 rounded-xl border border-gray-100 bg-white card-hover group"
       style={{ animationDelay: `${index * 150}ms` }}
     >
@@ -18,21 +19,23 @@ const FeatureCard = ({ icon: Icon, title, description, index }) => {
 };
 
 export default function FeatureSection() {
+  const { t } = useLanguage();
+
   const features = [
     {
       icon: ClipboardList,
-      title: "Survei Berbayar",
-      description: "Berikan pendapatmu dalam riset pasar dan dapatkan poin untuk setiap survei yang diselesaikan."
+      title: t('landing.featureSurveyTitle'),
+      description: t('landing.featureSurveyDesc')
     },
     {
       icon: Wallet,
-      title: "Pencairan Cepat",
-      description: "Tukarkan poinmu langsung ke e-wallet favoritmu. Tanpa biaya tersembunyi."
+      title: t('landing.featureWithdrawTitle'),
+      description: t('landing.featureWithdrawDesc')
     },
     {
       icon: Zap,
-      title: "Tugas Harian",
-      description: "Kerjakan tugas-tugas simpel setiap hari dan kumpulkan poin secara konsisten."
+      title: t('landing.featureDailyTitle'),
+      description: t('landing.featureDailyDesc')
     }
   ];
 
@@ -40,12 +43,12 @@ export default function FeatureSection() {
     <section className="py-16 px-4 bg-gray-50">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Cara Kerja</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{t('landing.featuresTitle')}</h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Platform yang menghargai waktu dan usahamu. Selesaikan tugas, kumpulkan poin, dan tukarkan menjadi uang.
+            {t('landing.featuresSubtitle')}
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <FeatureCard key={index} index={index} {...feature} />

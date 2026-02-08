@@ -4,7 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 // Eye icons for password visibility toggle
 const EyeIcon = () => (
@@ -23,6 +25,7 @@ const EyeSlashIcon = () => (
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     emailOrUsername: '',
     password: '',
@@ -52,7 +55,7 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError(err.message || t('login.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -62,25 +65,28 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#042C71] p-12 flex-col justify-between">
-        <div>
+        <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Image 
-              src="/icon.png" 
-              alt="Mikro Task" 
-              width={40} 
+            <Image
+              src="/icon.png"
+              alt="Mikro Task"
+              width={40}
               height={40}
               className="rounded-lg"
             />
             <span className="text-white text-xl font-bold">Mikro Task</span>
           </Link>
+          <div className="bg-white/10 rounded-lg">
+            <LanguageSwitcher variant="compact" isLanding={true} />
+          </div>
         </div>
-        
+
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">
-            Selamat Datang Kembali
+            {t('login.welcomeBack')}
           </h1>
           <p className="text-blue-200 text-lg">
-            Masuk untuk melanjutkan dan mulai menghasilkan dari tugas-tugas sederhana.
+            {t('login.subtitle')}
           </p>
         </div>
 
@@ -93,23 +99,24 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden mb-8">
+          <div className="lg:hidden mb-8 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Image 
-                src="/icon.png" 
-                alt="Mikro Task" 
-                width={36} 
+              <Image
+                src="/icon.png"
+                alt="Mikro Task"
+                width={36}
                 height={36}
                 className="rounded-lg"
               />
               <span className="text-[#042C71] text-xl font-bold">Mikro Task</span>
             </Link>
+            <LanguageSwitcher variant="compact" />
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Login</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('login.title')}</h2>
             <p className="text-gray-500 text-sm mb-6">
-              Masukkan email dan password untuk melanjutkan
+              {t('login.subtitle')}
             </p>
 
             {error && (
@@ -121,7 +128,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email atau Username
+                  {t('login.emailOrUsername')}
                 </label>
                 <input
                   type="text"
@@ -131,14 +138,14 @@ export default function LoginPage() {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent outline-none transition bg-white text-gray-900 placeholder-gray-400"
-                  placeholder="Masukkan email atau username"
+                  placeholder={t('login.emailOrUsernamePlaceholder')}
                   autoComplete="username"
                 />
               </div>
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password
+                  {t('login.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -149,7 +156,7 @@ export default function LoginPage() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#042C71] focus:border-transparent outline-none transition bg-white text-gray-900 placeholder-gray-400 pr-12"
-                    placeholder="Masukkan password"
+                    placeholder={t('login.passwordPlaceholder')}
                     autoComplete="current-password"
                   />
                   <button
@@ -168,21 +175,21 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full bg-[#042C71] hover:bg-[#031d4d] text-white py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Memproses...' : 'Login'}
+                {loading ? t('login.processing') : t('login.loginButton')}
               </button>
             </form>
 
             <div className="mt-6 text-center text-sm">
-              <span className="text-gray-500">Belum punya akun? </span>
+              <span className="text-gray-500">{t('login.noAccount')} </span>
               <Link href="/register" className="text-[#042C71] font-medium hover:underline">
-                Daftar
+                {t('login.registerNow')}
               </Link>
             </div>
           </div>
 
           <div className="mt-6 text-center">
             <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition">
-              ← Kembali ke Beranda
+              {t('login.backToHome')}
             </Link>
           </div>
         </div>

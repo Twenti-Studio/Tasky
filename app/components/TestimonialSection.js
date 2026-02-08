@@ -1,10 +1,11 @@
 'use client';
 
 import { Star } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const TestimonialCard = ({ name, role, content, rating, index }) => {
   return (
-    <div 
+    <div
       className="bg-white p-6 rounded-xl border border-gray-100 card-hover"
       style={{ animationDelay: `${index * 150}ms` }}
     >
@@ -30,23 +31,44 @@ const TestimonialCard = ({ name, role, content, rating, index }) => {
 };
 
 export default function TestimonialSection() {
-  const testimonials = [
+  const { t, language } = useLanguage();
+
+  const testimonials = language === 'id' ? [
     {
-      name: 'Budi Santoso',
-      role: 'Mahasiswa',
-      content: 'Platform yang bagus untuk mengisi waktu luang. Bisa dapat penghasilan tambahan dengan tugas-tugas yang simpel.',
+      name: 'Budi S.',
+      role: 'Pengguna Aktif',
+      content: 'Platform ini membantu saya berbagi pendapat dalam survei dan aktivitas responsif dengan jelas dan mudah.',
       rating: 5
     },
     {
-      name: 'Siti Rahayu',
-      role: 'Ibu Rumah Tangga',
-      content: 'Pencairan cepat dan mudah ke e-wallet. Sangat membantu untuk tambahan uang belanja bulanan.',
+      name: 'Siti R.',
+      role: 'Pengguna Aktif',
+      content: 'Prosesnya transparan dan user-friendly. Saya tahu betul kapan poin saya dihitung.',
       rating: 5
     },
     {
-      name: 'Ahmad Rizki',
-      role: 'Karyawan',
-      content: 'Cocok untuk penghasilan sampingan. Tugasnya tidak ribet dan hasilnya lumayan untuk tambahan.',
+      name: 'Ahmad R.',
+      role: 'Pengguna Aktif',
+      content: 'Cocok untuk mengisi waktu sambil berkontribusi pada riset digital.',
+      rating: 4
+    }
+  ] : [
+    {
+      name: 'Budi S.',
+      role: 'Active User',
+      content: 'This platform helps me share opinions in surveys and responsive activities clearly and easily.',
+      rating: 5
+    },
+    {
+      name: 'Siti R.',
+      role: 'Active User',
+      content: 'The process is transparent and user-friendly. I know exactly when my points are counted.',
+      rating: 5
+    },
+    {
+      name: 'Ahmad R.',
+      role: 'Active User',
+      content: 'Great for filling time while contributing to digital research.',
       rating: 4
     }
   ];
@@ -56,13 +78,13 @@ export default function TestimonialSection() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            Kata Pengguna
+            {t('landing.testimonialsTitle')}
           </h2>
           <p className="text-gray-500">
-            Pengalaman pengguna yang sudah bergabung dengan Mikro Task
+            {t('landing.testimonialsSubtitle')}
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
             <TestimonialCard key={index} index={index} {...testimonial} />

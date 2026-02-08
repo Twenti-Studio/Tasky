@@ -4,11 +4,13 @@ import { AlertCircle, Camera, CheckCircle2, FileText, MessageSquare, Plus, Send,
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 
 export default function ReportsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { t, language } = useLanguage();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -56,13 +58,13 @@ export default function ReportsPage() {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      setError('Hanya file gambar yang diperbolehkan (JPEG, PNG, GIF, WEBP)');
+      setError(t('reports.imageTypeError'));
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      setError('Ukuran file terlalu besar (maksimal 5MB)');
+      setError(t('reports.imageSizeError'));
       return;
     }
 
@@ -81,9 +83,9 @@ export default function ReportsPage() {
       const result = await api.uploadImage(file);
       console.log('[UploadImage] Success, received URL:', result.imageUrl);
       setFormData(prev => ({ ...prev, imageUrl: result.imageUrl }));
-      setSuccess('Gambar berhasil disiapkan. Silakan kirim laporan.');
+      setSuccess(t('reports.imageUploaded'));
     } catch (err) {
-      setError(err.message || 'Gagal mengupload gambar');
+      setError(err.message || t('reports.imageUploadFailed'));
       setPreviewImage(null);
     } finally {
       setUploading(false);
@@ -104,7 +106,7 @@ export default function ReportsPage() {
     setSuccess('');
 
     if (!formData.subject || !formData.description) {
-      setError('Subjek dan deskripsi harus diisi');
+      setError(t('reports.fillRequired'));
       return;
     }
 
@@ -114,13 +116,13 @@ export default function ReportsPage() {
       const res = await api.createReport(formData);
       console.log('[SubmitReport] Response:', res);
 
-      setSuccess('Laporan berhasil dikirim!');
+      setSuccess(t('reports.reportSubmitted'));
       setFormData({ subject: '', category: 'technical', description: '', imageUrl: '' });
       setPreviewImage(null);
       setShowForm(false);
       fetchReports();
     } catch (err) {
-      setError(err.message || 'Gagal mengirim laporan');
+      setError(err.message || t('reports.reportFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -128,10 +130,10 @@ export default function ReportsPage() {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      open: { color: 'bg-blue-100 text-blue-700 border border-blue-200', label: 'Terbuka' },
-      in_progress: { color: 'bg-amber-100 text-amber-700 border border-amber-200', label: 'Diproses' },
-      resolved: { color: 'bg-emerald-100 text-emerald-700 border border-emerald-200', label: 'Selesai' },
-      closed: { color: 'bg-slate-100 text-slate-700 border border-slate-200', label: 'Ditutup' }
+      open: { color: 'bg-blue-100 text-blue-700 border border-blue-200', label: t('reports.statusOpen') },
+      in_progress: { color: 'bg-amber-100 text-amber-700 border border-amber-200', label: t('reports.statusInProgress') },
+      resolved: { color: 'bg-emerald-100 text-emerald-700 border border-emerald-200', label: t('reports.statusResolved') },
+      closed: { color: 'bg-slate-100 text-slate-700 border border-slate-200', label: t('reports.statusClosed') }
     };
 
     const config = statusConfig[status] || statusConfig.open;
@@ -145,10 +147,10 @@ export default function ReportsPage() {
 
   const getCategoryLabel = (category) => {
     const categories = {
-      technical: 'Teknis',
-      payment: 'Pembayaran',
-      task: 'Tugas',
-      other: 'Lainnya'
+      technical: t('reports.categoryTechnical'),
+      payment: t('reports.categoryPayment'),
+      task: t('reports.categoryTask'),
+      other: t('reports.categoryOther')
     };
     return categories[category] || category;
   };
@@ -158,6 +160,15 @@ export default function ReportsPage() {
     return url.replace(/\/api$/, '');
   };
 
+  const formatDate = (date) => {
+    const locale = language === 'id' ? 'id-ID' : 'en-US';
+    return new Date(date).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -165,7 +176,7 @@ export default function ReportsPage() {
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-[#042C71] mx-auto"></div>
-              <p className="mt-4 text-slate-600 font-medium">Memuat data...</p>
+              <p className="mt-4 text-slate-600 font-medium">{t('common.loading')}</p>
             </div>
           </div>
         </div>
@@ -184,8 +195,8 @@ export default function ReportsPage() {
                 <FileText className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">Laporan & Aduan</h1>
-                <p className="text-slate-500 text-sm mt-0.5">Sampaikan masalah atau keluhan Anda kepada kami</p>
+                <h1 className="text-2xl font-bold text-slate-800">{t('reports.title')}</h1>
+                <p className="text-slate-500 text-sm mt-0.5">{t('reports.subtitle')}</p>
               </div>
             </div>
             <button
@@ -198,12 +209,12 @@ export default function ReportsPage() {
               {showForm ? (
                 <>
                   <X className="w-5 h-5" />
-                  Batal
+                  {t('common.cancel')}
                 </>
               ) : (
                 <>
                   <Plus className="w-5 h-5" />
-                  Buat Laporan
+                  {t('reports.createReport')}
                 </>
               )}
             </button>
@@ -231,49 +242,49 @@ export default function ReportsPage() {
               <div className="w-10 h-10 bg-[#CE4912]/10 rounded-lg flex items-center justify-center">
                 <Send className="w-5 h-5 text-[#CE4912]" />
               </div>
-              <h2 className="text-xl font-bold text-slate-800">Buat Laporan Baru</h2>
+              <h2 className="text-xl font-bold text-slate-800">{t('reports.newReport')}</h2>
             </div>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Subjek Laporan
+                  {t('reports.subject')}
                 </label>
                 <input
                   type="text"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-[#042C71]/20 focus:border-[#042C71] focus:bg-white transition-all duration-200"
-                  placeholder="Contoh: Poin tidak masuk setelah menyelesaikan tugas"
+                  placeholder={t('reports.subjectPlaceholder')}
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Kategori
+                  {t('reports.category')}
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:ring-2 focus:ring-[#042C71]/20 focus:border-[#042C71] focus:bg-white transition-all duration-200 cursor-pointer"
                 >
-                  <option value="technical">Teknis</option>
-                  <option value="payment">Pembayaran</option>
-                  <option value="task">Tugas</option>
-                  <option value="other">Lainnya</option>
+                  <option value="technical">{t('reports.categoryTechnical')}</option>
+                  <option value="payment">{t('reports.categoryPayment')}</option>
+                  <option value="task">{t('reports.categoryTask')}</option>
+                  <option value="other">{t('reports.categoryOther')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Deskripsi Masalah
+                  {t('reports.description')}
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={5}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-[#042C71]/20 focus:border-[#042C71] focus:bg-white transition-all duration-200 resize-none"
-                  placeholder="Jelaskan masalah Anda secara detail. Sertakan informasi seperti waktu kejadian, langkah yang sudah dilakukan, dll."
+                  placeholder={t('reports.descriptionPlaceholder')}
                   required
                 />
               </div>
@@ -281,7 +292,7 @@ export default function ReportsPage() {
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Bukti Kendala (Opsional)
+                  {t('reports.attachImage')}
                 </label>
                 <div className="space-y-3">
                   {previewImage || formData.imageUrl ? (
@@ -308,10 +319,10 @@ export default function ReportsPage() {
                         <Camera className="w-6 h-6 text-slate-400" />
                       </div>
                       <p className="text-slate-600 font-medium">
-                        {uploading ? 'Mengupload...' : 'Klik untuk upload gambar'}
+                        {uploading ? t('reports.uploading') : t('reports.clickToUpload')}
                       </p>
                       <p className="text-sm text-slate-400 mt-1">
-                        JPEG, PNG, GIF, WEBP (Maks. 5MB)
+                        {t('reports.imageFormats')}
                       </p>
                     </div>
                   )}
@@ -333,7 +344,7 @@ export default function ReportsPage() {
                   className="flex items-center gap-2 bg-gradient-to-r from-[#CE4912] to-[#e55a1f] text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
                 >
                   <Send className="w-5 h-5" />
-                  {submitting ? 'Mengirim...' : 'Kirim Laporan'}
+                  {submitting ? t('reports.submitting') : t('reports.submitReport')}
                 </button>
                 <button
                   type="button"
@@ -344,7 +355,7 @@ export default function ReportsPage() {
                   }}
                   className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all duration-200"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>
@@ -359,10 +370,10 @@ export default function ReportsPage() {
                 <MessageSquare className="w-10 h-10 text-slate-300" />
               </div>
               <h3 className="text-xl font-bold text-slate-800 mb-2">
-                Belum Ada Laporan
+                {t('reports.noReports')}
               </h3>
               <p className="text-slate-500 max-w-md mx-auto">
-                Anda belum memiliki laporan. Klik tombol &quot;Buat Laporan&quot; di atas untuk menyampaikan masalah atau keluhan.
+                {t('reports.noReportsDesc')}
               </p>
             </div>
           ) : (
@@ -379,11 +390,7 @@ export default function ReportsPage() {
                       </span>
                       <span className="text-slate-400">•</span>
                       <span className="text-slate-500">
-                        {new Date(report.createdAt).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
+                        {formatDate(report.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -399,10 +406,10 @@ export default function ReportsPage() {
                 {/* Display uploaded image */}
                 {report.imageUrl && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-slate-600 mb-2">Bukti Kendala:</p>
+                    <p className="text-sm font-medium text-slate-600 mb-2">{t('reports.evidenceAttached')}</p>
                     <img
                       src={`${getApiBaseUrl()}${report.imageUrl}`}
-                      alt="Bukti kendala"
+                      alt={t('reports.evidenceAttached')}
                       className="max-w-full max-h-64 rounded-lg border border-slate-200 object-contain cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => window.open(`${getApiBaseUrl()}${report.imageUrl}`, '_blank')}
                     />
@@ -413,7 +420,7 @@ export default function ReportsPage() {
                   <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#042C71] rounded-r-xl">
                     <p className="text-sm font-bold text-[#042C71] mb-1 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" />
-                      Tanggapan Admin
+                      {t('reports.adminResponse')}
                     </p>
                     <p className="text-sm text-slate-700 leading-relaxed">
                       {report.adminNote}

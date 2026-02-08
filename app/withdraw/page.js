@@ -4,11 +4,13 @@ import { AlertCircle, Calendar, CheckCircle, Info, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 
 export default function WithdrawPage() {
   const router = useRouter();
   const { user, loading: authLoading, refreshUser } = useAuth();
+  const { t } = useLanguage();
   const [amount, setAmount] = useState('');
   const [bankMethod, setBankMethod] = useState('dana'); // Default to DANA
   const [danaNumber, setDanaNumber] = useState('');
@@ -41,28 +43,28 @@ export default function WithdrawPage() {
     const withdrawAmount = parseInt(amount);
 
     if (!withdrawAmount || withdrawAmount < 5000) {
-      setError('Minimum withdrawal is 5,000 points');
+      setError(t('withdraw.minimumError'));
       return;
     }
 
     if (withdrawAmount > (user?.balance || 0)) {
-      setError('Insufficient balance');
+      setError(t('withdraw.insufficientBalance'));
       return;
     }
 
     if (!danaNumber) {
-      setError('Please enter your DANA phone number');
+      setError(t('withdraw.enterDanaNumber'));
       return;
     }
 
     if (!danaName) {
-      setError('Please enter your DANA account name');
+      setError(t('withdraw.enterDanaName'));
       return;
     }
 
     // Validate phone number format
     if (!/^(08|628)[0-9]{8,12}$/.test(danaNumber.replace(/\s/g, ''))) {
-      setError('Please enter a valid Indonesian phone number');
+      setError(t('withdraw.invalidPhoneNumber'));
       return;
     }
 
@@ -76,7 +78,7 @@ export default function WithdrawPage() {
       setDanaName('');
       await refreshUser();
     } catch (err) {
-      setError(err.message || 'Failed to process withdrawal');
+      setError(err.message || t('withdraw.withdrawalFailed'));
     } finally {
       setLoading(false);
     }
@@ -97,16 +99,16 @@ export default function WithdrawPage() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-gray-800">Withdraw</h1>
-          <p className="text-sm text-gray-500">Cash out your points to DANA</p>
+          <h1 className="text-xl font-bold text-gray-800">{t('withdraw.title')}</h1>
+          <p className="text-sm text-gray-500">{t('withdraw.subtitle')}</p>
         </div>
 
         {/* Balance Card */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Available Balance</p>
-              <p className="text-2xl font-bold text-[#042C71]">{formatPoints(user?.balance || 0)} <span className="text-lg font-normal">pts</span></p>
+              <p className="text-sm text-gray-500">{t('withdraw.availableBalance')}</p>
+              <p className="text-2xl font-bold text-[#042C71]">{formatPoints(user?.balance || 0)} <span className="text-lg font-normal">{t('common.pts')}</span></p>
             </div>
             <div className="w-12 h-12 bg-[#042C71]/10 rounded-full flex items-center justify-center">
               <Wallet className="text-[#042C71]" size={24} />
@@ -119,9 +121,9 @@ export default function WithdrawPage() {
           <div className="flex gap-3">
             <Info className="text-blue-600 flex-shrink-0" size={20} />
             <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">Conversion Rate</p>
-              <p>1,000 Points = Rp 1,000</p>
-              <p className="mt-1">Minimum Withdrawal: 5,000 Points</p>
+              <p className="font-semibold mb-1">{t('withdraw.conversionRate')}</p>
+              <p>{t('withdraw.conversionInfo')}</p>
+              <p className="mt-1">{t('withdraw.minimumWithdrawal')}</p>
             </div>
           </div>
         </div>
@@ -131,9 +133,9 @@ export default function WithdrawPage() {
           <div className="flex gap-3">
             <Calendar className="text-amber-600 flex-shrink-0" size={20} />
             <div className="text-sm text-amber-800">
-              <p className="font-semibold mb-1">Jadwal Pencairan</p>
-              <p>Penarikan diproses setiap <strong>akhir bulan</strong> secara serentak.</p>
-              <p className="mt-1 text-xs">Request yang masuk sebelum tanggal 25 akan diproses pada akhir bulan yang sama.</p>
+              <p className="font-semibold mb-1">{t('withdraw.withdrawalSchedule')}</p>
+              <p>{t('withdraw.scheduleInfo')}</p>
+              <p className="mt-1 text-xs">{t('withdraw.scheduleNote')}</p>
             </div>
           </div>
         </div>
@@ -143,9 +145,9 @@ export default function WithdrawPage() {
             <div className="flex items-start gap-3">
               <AlertCircle className="text-orange-600 flex-shrink-0" size={20} />
               <div>
-                <p className="font-semibold text-orange-900">Not enough points</p>
+                <p className="font-semibold text-orange-900">{t('withdraw.notEnoughPoints')}</p>
                 <p className="text-sm text-orange-700 mt-1">
-                  You need {formatPoints(5000 - (user?.balance || 0))} more points to withdraw.
+                  {t('withdraw.needMorePoints', { amount: formatPoints(5000 - (user?.balance || 0)) })}
                 </p>
               </div>
             </div>
@@ -153,9 +155,9 @@ export default function WithdrawPage() {
         ) : success ? (
           <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
             <CheckCircle className="text-green-600 mx-auto mb-3" size={48} />
-            <h3 className="font-semibold text-green-900 mb-2">Withdrawal Requested!</h3>
+            <h3 className="font-semibold text-green-900 mb-2">{t('withdraw.withdrawalRequested')}</h3>
             <p className="text-sm text-green-700">
-              Your withdrawal request has been submitted. It will be processed at the end of the month.
+              {t('withdraw.withdrawalSuccess')}
             </p>
           </div>
         ) : (
@@ -169,13 +171,13 @@ export default function WithdrawPage() {
             {/* Amount */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Jumlah Penarikan (Points)
+                {t('withdraw.withdrawAmount')}
               </label>
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="Masukkan jumlah points"
+                placeholder={t('withdraw.enterPoints')}
                 min="5000"
                 max={user?.balance || 0}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
@@ -207,12 +209,12 @@ export default function WithdrawPage() {
 
             {/* DANA Payment */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-800 mb-4">Metode Penarikan</h3>
+              <h3 className="font-semibold text-gray-800 mb-4">{t('withdraw.withdrawMethod')}</h3>
 
               {/* Bank Method Dropdown */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pilih Bank/E-Wallet
+                  {t('withdraw.selectBank')}
                 </label>
                 <select
                   value={bankMethod}
@@ -232,37 +234,37 @@ export default function WithdrawPage() {
                       <span className="text-white font-bold text-sm">DANA</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">DANA E-Wallet</p>
-                      <p className="text-xs text-gray-500">Transfer ke akun DANA</p>
+                      <p className="font-semibold text-gray-800">{t('withdraw.danaEWallet')}</p>
+                      <p className="text-xs text-gray-500">{t('withdraw.transferToDANA')}</p>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nomor Telepon DANA *
+                        {t('withdraw.danaPhoneNumber')}
                       </label>
                       <input
                         type="tel"
                         value={danaNumber}
                         onChange={(e) => setDanaNumber(e.target.value)}
-                        placeholder="08xxxxxxxxxx"
+                        placeholder={t('withdraw.danaPhonePlaceholder')}
                         className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Nomor yang terdaftar di DANA</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('withdraw.danaPhoneHint')}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nama Pemilik Akun DANA *
+                        {t('withdraw.danaAccountName')}
                       </label>
                       <input
                         type="text"
                         value={danaName}
                         onChange={(e) => setDanaName(e.target.value)}
-                        placeholder="Nama sesuai akun DANA"
+                        placeholder={t('withdraw.danaNamePlaceholder')}
                         className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#042C71] bg-white text-gray-900"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Sesuai dengan nama di akun DANA Anda</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('withdraw.danaNameHint')}</p>
                     </div>
                   </div>
                 </>
@@ -275,7 +277,7 @@ export default function WithdrawPage() {
               disabled={loading}
               className="w-full bg-[#042C71] text-white py-4 rounded-xl font-semibold hover:bg-blue-800 transition disabled:opacity-50"
             >
-              {loading ? 'Processing...' : 'Request Withdrawal'}
+              {loading ? t('withdraw.processing') : t('withdraw.requestWithdrawal')}
             </button>
           </form>
         )}
