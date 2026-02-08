@@ -40,12 +40,12 @@ const en = {
     // Landing page
     landing: {
         // Hero section
-        heroSubtitle: 'Digital Participation Platform with Rewards',
+        heroSubtitle: 'Digital Participation Platform & Interactive Tasks',
         heroTitle: 'Digital Participation Platform',
-        heroTitleHighlight: 'with Rewards',
-        heroDescription: 'MiTa is a platform for participating in digital activities such as surveys, feedback, and simple tasks — with a fair and transparent points system.',
-        startNow: 'Start Now (Free)',
-        haveAccount: 'Already Have an Account',
+        heroTitleHighlight: '& Interactive Tasks',
+        heroDescription: 'MiTa is a place to participate in digital activities such as surveys and simple response tasks — your activity is rewarded with points that can be exchanged through available redemption methods.',
+        startNow: 'Start Participating — Free',
+        haveAccount: 'View Available Activities',
         freeForever: 'Free Forever',
         fastWithdrawal: 'Transparent Process',
         noHiddenFees: 'Clear Points System',
@@ -58,11 +58,12 @@ const en = {
         navFeatures: 'Features',
         navHowItWorks: 'How It Works',
         navTestimonials: 'Testimonials',
+        navFaq: 'FAQ',
         // Features section
         featuresTitle: 'MiTa Advantages',
         featuresSubtitle: 'A platform designed for comfortable and trusted digital participation.',
-        featureSurveyTitle: 'Meaningful Participation',
-        featureSurveyDesc: 'Join valuable activities like surveys and simple tasks, and share your opinions for research and development.',
+        featureSurveyTitle: 'Participation & Valued Digital Activities',
+        featureSurveyDesc: 'Join surveys, interactive tasks, and other beneficial activities to earn points that are calculated through our system and can be redeemed according to terms.',
         featureWithdrawTitle: 'Clear & Fair Points System',
         featureWithdrawDesc: 'No hidden actions — every task is clear, every point is visible. Points will be added after verification is complete.',
         featureDailyTitle: 'Focus on User Experience',
@@ -74,9 +75,14 @@ const en = {
         // Testimonials section
         testimonialsTitle: 'What Users Say',
         testimonialsSubtitle: 'Experience from users who have joined the MiTa platform',
+        // FAQ section
+        faqTitle: 'Frequently Asked Questions',
+        faqSubtitle: 'Find answers to commonly asked questions',
+        faqStillHaveQuestions: 'Still have questions?',
+        faqContactUs: 'Contact us',
         // How it works section
         howItWorksTitle: 'How MiTa Works',
-        howItWorksSubtitle: 'A simple and transparent process for your digital participation.',
+        howItWorksSubtitle: 'Follow activities, collect points after verification process, and use those points according to available redemption options.',
         step1Title: 'Register & Login',
         step1Desc: 'Create an account and see the list of available activities.',
         step2Title: 'Choose Activity',
@@ -102,7 +108,7 @@ const en = {
     login: {
         title: 'Login',
         welcomeBack: 'Welcome Back',
-        subtitle: 'Sign in to continue and start earning from simple tasks.',
+        subtitle: 'Sign in to participate and collect points from available activities.',
         emailOrUsername: 'Email or Username',
         emailOrUsernamePlaceholder: 'Enter your email or username',
         password: 'Password',
@@ -122,7 +128,7 @@ const en = {
         subtitle: 'Fill in the form below to register',
         heroTitle: 'Start Your Journey',
         heroSubtitle: 'With Mita',
-        heroDescription: 'Register now and earn extra income from simple tasks.',
+        heroDescription: 'Register now to start participating in digital activities and collect points.',
         usersJoined: '1,200+ users have joined',
         username: 'Username',
         usernamePlaceholder: 'Choose a username',
@@ -171,7 +177,7 @@ const en = {
         recentActivity: 'Recent Activity',
         viewAll: 'View All',
         noActivity: 'No activity yet',
-        startEarning: 'Start earning now →',
+        startEarning: 'Start participating now →',
     },
 
     // Tasks page
@@ -182,7 +188,7 @@ const en = {
         quickEarn: 'Quick Earn',
         surveys: 'Surveys',
         offers: 'Offers',
-        dailyTip: 'Daily tasks reset at midnight. Complete all available tasks each day for maximum earnings.',
+        dailyTip: 'Daily tasks reset at midnight. Complete all available tasks each day to maximize points earned.',
         checkingTasks: 'Checking for new tasks...',
         available: 'Available',
         selectTaskBelow: 'Select available tasks below',
@@ -293,10 +299,10 @@ const en = {
     // History page
     history: {
         title: 'History',
-        subtitle: 'Your earnings and withdrawal history',
+        subtitle: 'Your points and activity history',
         noHistory: 'No history yet',
-        startEarning: 'Start completing tasks to see your earnings history.',
-        earnings: 'Earnings',
+        startEarning: 'Start participating to see your activity history.',
+        earnings: 'Points Earned',
         withdrawals: 'Withdrawals',
         noEarnings: 'No earnings yet',
         noWithdrawals: 'No withdrawals yet',
@@ -416,7 +422,7 @@ const en = {
 
     // Footer
     footer: {
-        description: 'The most trusted micro task platform in Indonesia. Earn extra income by completing simple tasks.',
+        description: 'The most trusted micro task platform in Indonesia. Earn points from digital activities and interactive tasks.',
         quickLinks: 'Quick Links',
         aboutUs: 'About Us',
         howItWorks: 'How It Works',
@@ -441,6 +447,45 @@ const en = {
         username: 'Username',
         balance: 'Balance',
         joined: 'Joined',
+    },
+
+    // Privacy Policy
+    privacy: {
+        title: 'MiTa Privacy Policy',
+        intro: 'MiTa respects and protects user privacy. This policy explains how data is collected, used, and maintained.',
+        section1Title: '1. Information Collected',
+        section1Desc: 'MiTa may collect information such as:',
+        section1Item1: 'Name or username',
+        section1Item2: 'Email address',
+        section1Item3: 'Activity data on the platform',
+        section2Title: '2. Data Usage',
+        section2Desc1: 'Data is used for:',
+        section2Item1: 'Platform operations',
+        section2Item2: 'Activity and points verification',
+        section2Item3: 'Improving service quality',
+        section2Desc2: 'MiTa does not sell personal user data to third parties without permission.',
+        section3Title: '3. Data Security',
+        section3Desc: 'MiTa implements reasonable security measures to protect user data from unauthorized access.',
+        section4Title: '4. Cookies',
+        section4Desc: 'MiTa may use cookies to improve user experience and platform usage analysis.',
+        section5Title: '5. Policy Changes',
+        section5Desc: 'The Privacy Policy may be updated at any time. Changes will be announced through the platform.',
+        section6Title: '6. Agreement',
+        section6Desc: 'By using MiTa, users are considered to have read and agreed to this Privacy Policy.',
+    },
+
+    // Terms of Service
+    terms: {
+        title: 'MiTa Terms of Service',
+        intro: 'Welcome to MiTa. By accessing our platform, you agree to comply with the following terms.',
+        section1Title: '1. One Account Rule',
+        section1Desc: 'To ensure fairness, we strictly enforce a "One Account Per User" rule. Users found with multiple accounts will be permanently banned.',
+        section2Title: '2. Prohibited Activities',
+        section2Desc: 'The use of VPNs, proxies, or any other methods to hide your real identity or location is strictly prohibited.',
+        section3Title: '3. Verification & Points',
+        section3Desc: 'All point redemption requests go through a manual review process to ensure activities comply with instructions.',
+        section4Title: '4. Changes to Terms',
+        section4Desc: 'MiTa reserves the right to modify these terms at any time. Continued use of the platform constitutes acceptance of the new terms.',
     },
 };
 

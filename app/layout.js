@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "MiTa — Earn Points with Micro Tasks",
-  description: "Join the most trusted micro-task platform in Indonesia. Earn points by completing simple tasks and convert them to cash!",
+  title: "MiTa — Platform Partisipasi Digital & Tugas Interaktif",
+  description: "Ikuti berbagai aktivitas digital dan kumpulkan poin sebagai bentuk apresiasi atas partisipasi Anda di platform terpercaya.",
 };
 
 export default function RootLayout({ children }) {

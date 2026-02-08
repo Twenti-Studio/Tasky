@@ -37,13 +37,13 @@ export default function TestimonialSection() {
     {
       name: 'Budi S.',
       role: 'Pengguna Aktif',
-      content: 'Platform ini membantu saya berbagi pendapat dalam survei dan aktivitas responsif dengan jelas dan mudah.',
+      content: 'Platform ini membantu saya berpartisipasi dalam survei dan aktivitas respons yang jelas dan mudah.',
       rating: 5
     },
     {
       name: 'Siti R.',
       role: 'Pengguna Aktif',
-      content: 'Prosesnya transparan dan user-friendly. Saya tahu betul kapan poin saya dihitung.',
+      content: 'Poin masuk setelah verifikasi dan penukaran mudah dilakukan.',
       rating: 5
     },
     {
@@ -56,13 +56,13 @@ export default function TestimonialSection() {
     {
       name: 'Budi S.',
       role: 'Active User',
-      content: 'This platform helps me share opinions in surveys and responsive activities clearly and easily.',
+      content: 'This platform helps me participate in surveys and response activities that are clear and easy.',
       rating: 5
     },
     {
       name: 'Siti R.',
       role: 'Active User',
-      content: 'The process is transparent and user-friendly. I know exactly when my points are counted.',
+      content: 'Points are credited after verification and redemption is easy to do.',
       rating: 5
     },
     {

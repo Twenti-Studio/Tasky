@@ -40,18 +40,18 @@ export default function Footer() {
             <h4 className="text-white font-medium mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/#features" className="hover:text-white transition-colors">
+                <Link href="/#how-it-works" className="hover:text-white transition-colors">
                   {t('footer.howItWorks')}
                 </Link>
               </li>
               <li>
-                <Link href="/#how-it-works" className="hover:text-white transition-colors">
-                  {t('footer.aboutUs')}
+                <Link href="/#features" className="hover:text-white transition-colors">
+                  {t('footer.quickLinks')}
                 </Link>
               </li>
               <li>
-                <Link href="/#testimonials" className="hover:text-white transition-colors">
-                  {t('footer.support')}
+                <Link href="/#faq" className="hover:text-white transition-colors">
+                  {t('landing.navFaq')}
                 </Link>
               </li>
             </ul>

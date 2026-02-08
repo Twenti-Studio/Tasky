@@ -22,8 +22,8 @@ export default function Navbar() {
   };
 
   // Don't show navbar on landing, login, register, or admin pages
-  // Admin pages have their own layout with sidebar
-  if (!user || pathname === '/' || pathname === '/login' || pathname === '/register' || pathname?.startsWith('/admin')) {
+  // Also don't show on static public pages like privacy and terms
+  if (!user || pathname === '/' || pathname === '/login' || pathname === '/register' || pathname === '/privacy' || pathname === '/terms' || pathname?.startsWith('/admin')) {
     return null;
   }
 

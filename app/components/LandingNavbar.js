@@ -7,23 +7,25 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
-export default function LandingNavbar() {
+export default function LandingNavbar({ isStatic = false }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(isStatic);
   const { t } = useLanguage();
 
   useEffect(() => {
+    if (isStatic) return;
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isStatic]);
 
   const navLinks = [
     { href: '#features', label: t('landing.navFeatures') },
     { href: '#how-it-works', label: t('landing.navHowItWorks') },
-    { href: '#testimonials', label: t('landing.navTestimonials') }
+    { href: '#testimonials', label: t('landing.navTestimonials') },
+    { href: '#faq', label: t('landing.navFaq') }
   ];
 
   const scrollToSection = (e, href) => {
@@ -39,8 +41,8 @@ export default function LandingNavbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-            ? 'bg-white shadow-sm py-3'
-            : 'bg-transparent py-4'
+          ? 'bg-white shadow-sm py-3'
+          : 'bg-transparent py-4'
           }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -84,8 +86,8 @@ export default function LandingNavbar() {
               <Link
                 href="/login"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 btn-press ${scrolled
-                    ? 'text-[#042C71] hover:bg-gray-100'
-                    : 'text-white hover:bg-white/10'
+                  ? 'text-[#042C71] hover:bg-gray-100'
+                  : 'text-white hover:bg-white/10'
                   }`}
               >
                 {t('nav.login')}

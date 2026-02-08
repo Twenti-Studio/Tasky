@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from "next/link";
 import { useEffect, useRef } from 'react';
+import FAQSection from "./components/FAQSection";
 import FeatureSection from "./components/FeatureSection";
 import LandingNavbar from "./components/LandingNavbar";
 import StatsSection from "./components/StatsSection";
@@ -187,6 +188,11 @@ export default function Home() {
       {/* Testimonial Section */}
       <div id="testimonials" className="scroll-reveal">
         <TestimonialSection />
+      </div>
+
+      {/* FAQ Section */}
+      <div id="faq" className="scroll-reveal">
+        <FAQSection />
       </div>
 
       {/* Final CTA Section */}

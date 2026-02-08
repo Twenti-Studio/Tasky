@@ -40,12 +40,12 @@ const id = {
     // Landing page
     landing: {
         // Hero section
-        heroSubtitle: 'Platform Partisipasi Digital dengan Hadiah',
+        heroSubtitle: 'Platform Partisipasi Digital & Tugas Interaktif',
         heroTitle: 'Platform Partisipasi Digital',
-        heroTitleHighlight: 'dengan Hadiah',
-        heroDescription: 'MiTa adalah platform untuk berpartisipasi dalam aktivitas digital seperti survei, feedback, dan tugas sederhana — dengan sistem poin yang adil dan transparan.',
-        startNow: 'Mulai Sekarang (Gratis)',
-        haveAccount: 'Sudah Punya Akun',
+        heroTitleHighlight: '& Tugas Interaktif',
+        heroDescription: 'MiTa adalah tempat untuk ikut serta dalam aktivitas digital seperti survei dan tugas respons sederhana — aktivitasmu dihargai dengan poin yang bisa ditukar melalui metode penukaran yang tersedia.',
+        startNow: 'Mulai Berpartisipasi — Gratis',
+        haveAccount: 'Lihat Aktivitas Tersedia',
         freeForever: 'Gratis Selamanya',
         fastWithdrawal: 'Proses Transparan',
         noHiddenFees: 'Sistem Poin Jelas',
@@ -58,11 +58,12 @@ const id = {
         navFeatures: 'Keunggulan',
         navHowItWorks: 'Cara Kerja',
         navTestimonials: 'Testimoni',
+        navFaq: 'FAQ',
         // Features section (Keunggulan)
         featuresTitle: 'Keunggulan MiTa',
         featuresSubtitle: 'Platform yang dirancang untuk partisipasi digital yang nyaman dan terpercaya.',
-        featureSurveyTitle: 'Partisipasi Berfaedah',
-        featureSurveyDesc: 'Bergabung dalam aktivitas bernilai seperti survei dan tugas sederhana, serta berikan pendapat Anda untuk riset dan pengembangan.',
+        featureSurveyTitle: 'Partisipasi & Aktivitas Digital yang Dihargai',
+        featureSurveyDesc: 'Ikuti survei, tugas tugasan interaktif, dan aktivitas berfaedah lainnya untuk mendapatkan poin yang akan dihitung melalui sistem kami dan dapat ditukarkan sesuai ketentuan.',
         featureWithdrawTitle: 'Sistem Poin yang Jelas & Adil',
         featureWithdrawDesc: 'Tidak ada tindakan tersembunyi — setiap tugas jelas, setiap poin terlihat. Poin akan ditambahkan setelah pemeriksaan selesai.',
         featureDailyTitle: 'Fokus pada Pengalaman Pengguna',
@@ -74,9 +75,14 @@ const id = {
         // Testimonials section
         testimonialsTitle: 'Apa Kata Pengguna',
         testimonialsSubtitle: 'Pengalaman pengguna yang sudah bergabung dengan platform MiTa',
+        // FAQ section
+        faqTitle: 'Pertanyaan Umum',
+        faqSubtitle: 'Temukan jawaban atas pertanyaan yang sering diajukan',
+        faqStillHaveQuestions: 'Masih punya pertanyaan?',
+        faqContactUs: 'Hubungi kami',
         // How it works section
         howItWorksTitle: 'Bagaimana MiTa Bekerja',
-        howItWorksSubtitle: 'Proses yang sederhana dan transparan untuk partisipasi digital Anda.',
+        howItWorksSubtitle: 'Ikuti aktivitas, kumpulkan poin setelah proses verifikasi, dan gunakan poin tersebut sesuai pilihan penukaran yang tersedia.',
         step1Title: 'Daftar & Masuk',
         step1Desc: 'Buat akun dan lihat daftar aktivitas yang tersedia.',
         step2Title: 'Pilih Aktivitas',
@@ -102,7 +108,7 @@ const id = {
     login: {
         title: 'Masuk',
         welcomeBack: 'Selamat Datang Kembali',
-        subtitle: 'Masuk untuk melanjutkan dan mulai menghasilkan dari tugas-tugas sederhana.',
+        subtitle: 'Masuk untuk berpartisipasi dan kumpulkan poin dari aktivitas tersedia.',
         emailOrUsername: 'Email atau Username',
         emailOrUsernamePlaceholder: 'Masukkan email atau username',
         password: 'Kata Sandi',
@@ -122,7 +128,7 @@ const id = {
         subtitle: 'Isi data dibawah untuk mendaftar',
         heroTitle: 'Mulai Perjalananmu',
         heroSubtitle: 'Bersama Mita',
-        heroDescription: 'Daftar sekarang dan dapatkan penghasilan tambahan dari tugas-tugas sederhana.',
+        heroDescription: 'Daftar sekarang untuk mulai berpartisipasi dalam aktivitas digital dan kumpulkan poin.',
         usersJoined: '1.200+ pengguna sudah bergabung',
         username: 'Username',
         usernamePlaceholder: 'Pilih username',
@@ -171,7 +177,7 @@ const id = {
         recentActivity: 'Aktivitas Terbaru',
         viewAll: 'Lihat Semua',
         noActivity: 'Belum ada aktivitas',
-        startEarning: 'Mulai menghasilkan sekarang →',
+        startEarning: 'Mulai berpartisipasi sekarang →',
     },
 
     // Tasks page
@@ -182,7 +188,7 @@ const id = {
         quickEarn: 'Cepat',
         surveys: 'Survei',
         offers: 'Penawaran',
-        dailyTip: 'Tugas harian direset pada tengah malam. Selesaikan semua tugas yang tersedia setiap hari untuk memaksimalkan penghasilan.',
+        dailyTip: 'Tugas harian direset pada tengah malam. Selesaikan semua tugas yang tersedia setiap hari untuk memaksimalkan poin yang didapat.',
         checkingTasks: 'Memeriksa tugas baru...',
         available: 'Tersedia',
         selectTaskBelow: 'Pilih tugas yang tersedia di bawah ini',
@@ -293,10 +299,10 @@ const id = {
     // History page
     history: {
         title: 'Riwayat',
-        subtitle: 'Riwayat penghasilan dan penarikan Anda',
+        subtitle: 'Riwayat poin dan aktivitas Anda',
         noHistory: 'Belum ada riwayat',
-        startEarning: 'Mulai menyelesaikan tugas untuk melihat riwayat penghasilan Anda.',
-        earnings: 'Penghasilan',
+        startEarning: 'Mulai berpartisipasi untuk melihat riwayat aktivitas Anda.',
+        earnings: 'Poin Masuk',
         withdrawals: 'Penarikan',
         noEarnings: 'Belum ada penghasilan',
         noWithdrawals: 'Belum ada penarikan',
@@ -416,7 +422,7 @@ const id = {
 
     // Footer
     footer: {
-        description: 'Platform mikro task terpercaya di Indonesia. Dapatkan penghasilan tambahan dengan menyelesaikan tugas-tugas sederhana.',
+        description: 'Platform mikro task terpercaya di Indonesia. Dapatkan poin dari aktivitas digital dan tugas interaktif.',
         quickLinks: 'Tautan Cepat',
         aboutUs: 'Tentang Kami',
         howItWorks: 'Cara Kerja',
@@ -441,6 +447,45 @@ const id = {
         username: 'Username',
         balance: 'Saldo',
         joined: 'Bergabung',
+    },
+
+    // Privacy Policy
+    privacy: {
+        title: 'Kebijakan Privasi MiTa',
+        intro: 'MiTa menghargai dan melindungi privasi pengguna. Kebijakan ini menjelaskan bagaimana data dikumpulkan, digunakan, dan dijaga.',
+        section1Title: '1. Informasi yang Dikumpulkan',
+        section1Desc: 'MiTa dapat mengumpulkan informasi seperti:',
+        section1Item1: 'Nama atau username',
+        section1Item2: 'Alamat email',
+        section1Item3: 'Data aktivitas di platform',
+        section2Title: '2. Penggunaan Data',
+        section2Desc1: 'Data digunakan untuk:',
+        section2Item1: 'Operasional platform',
+        section2Item2: 'Verifikasi aktivitas dan poin',
+        section2Item3: 'Peningkatan kualitas layanan',
+        section2Desc2: 'MiTa tidak menjual data pribadi pengguna kepada pihak ketiga tanpa izin.',
+        section3Title: '3. Keamanan Data',
+        section3Desc: 'MiTa menerapkan langkah-langkah keamanan yang wajar untuk melindungi data pengguna dari akses tidak sah.',
+        section4Title: '4. Cookie',
+        section4Desc: 'MiTa dapat menggunakan cookie untuk meningkatkan pengalaman pengguna dan analisis penggunaan platform.',
+        section5Title: '5. Perubahan Kebijakan',
+        section5Desc: 'Kebijakan Privasi dapat diperbarui sewaktu-waktu. Perubahan akan diumumkan melalui platform.',
+        section6Title: '6. Persetujuan',
+        section6Desc: 'Dengan menggunakan MiTa, pengguna dianggap telah membaca dan menyetujui Kebijakan Privasi ini.',
+    },
+
+    // Terms of Service
+    terms: {
+        title: 'Ketentuan Layanan MiTa',
+        intro: 'Selamat datang di MiTa. Dengan mengakses platform kami, Anda setuju untuk mematuhi ketentuan berikut.',
+        section1Title: '1. Peraturan Satu Akun',
+        section1Desc: 'Untuk menjaga keadilan, kami menerapkan aturan ketat "Satu Akun Per Pengguna". Pengguna yang memiliki akun ganda akan diblokir secara permanen.',
+        section2Title: '2. Aktivitas yang Dilarang',
+        section2Desc: 'Penggunaan VPN, proxy, atau metode lain untuk menyembunyikan identitas atau lokasi asli dilarang keras.',
+        section3Title: '3. Verifikasi & Poin',
+        section3Desc: 'Semua permintaan penukaran poin akan melalui proses peninjauan manual untuk memastikan aktivitas telah sesuai dengan instruksi.',
+        section4Title: '4. Perubahan Ketentuan',
+        section4Desc: 'MiTa berhak mengubah ketentuan ini sewaktu-waktu. Penggunaan platform yang berkelanjutan merupakan persetujuan Anda atas ketentuan baru.',
     },
 };
 
