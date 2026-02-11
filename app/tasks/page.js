@@ -200,6 +200,7 @@ export default function TasksPage() {
       theoremreach: process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID && process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID !== 'your-theoremreach-app-id',
       adgem: process.env.NEXT_PUBLIC_ADGEM_APP_ID && process.env.NEXT_PUBLIC_ADGEM_APP_ID !== 'your-adgem-app-id',
       kiwiwall: process.env.NEXT_PUBLIC_KIWIWALL_APP_ID && process.env.NEXT_PUBLIC_KIWIWALL_APP_ID !== 'your-kiwiwall-app-id',
+      wannads: process.env.NEXT_PUBLIC_WANNADS_API_KEY && process.env.NEXT_PUBLIC_WANNADS_API_KEY !== 'your-wannads-api-key',
     };
     return keys[providerId] || false;
   };
@@ -378,6 +379,26 @@ export default function TasksPage() {
           pointsDisplay: 'Up to 10000 pts',
           isOfferwall: true,
           taskIcon: Leaf,
+        },
+      ],
+    },
+    {
+      id: 'wannads',
+      name: 'Wannads Offers',
+      category: 'offers',
+      icon: Star,
+      color: 'bg-yellow-600',
+      description: 'Premium offers & rewards',
+      payout: '100-15000 pts',
+      tasks: [
+        {
+          id: 'offerwall',
+          name: 'Premium Walls',
+          description: 'Complete offers & earn big',
+          points: 0,
+          pointsDisplay: 'Up to 15000 pts',
+          isOfferwall: true,
+          taskIcon: Star,
         },
       ],
     },
@@ -641,9 +662,30 @@ export default function TasksPage() {
       theoremreach: `https://theoremreach.com/respondent_entry/direct?api_key=${process.env.NEXT_PUBLIC_THEOREMREACH_APP_ID}&user_id=${user.id}&transaction_id=${Date.now()}`,
       adgem: `https://api.adgem.com/v1/wall?appid=${process.env.NEXT_PUBLIC_ADGEM_APP_ID}&player_id=${user.id}`,
       kiwiwall: `https://www.kiwiwall.com/wall/${process.env.NEXT_PUBLIC_KIWIWALL_APP_ID}/iframe?s1=${user.id}`,
+      wannads: `https://earn.wannads.com/wall?apiKey=${process.env.NEXT_PUBLIC_WANNADS_API_KEY}&userId=${user.id}`,
     };
 
     if (directUrls[provider]) {
+      // Providers yang support native iframe embedding - langsung load tanpa proxy
+      const directIframeProviders = ['wannads'];
+
+      if (directIframeProviders.includes(provider)) {
+        console.log(`[Tasks] Opening ${provider} directly (native iframe):`, directUrls[provider]);
+
+        setIframeLoading(true);
+        setIframeError(false);
+        setIframeUrl(directUrls[provider]);
+
+        window._directTaskUrl = directUrls[provider];
+        window._currentProvider = provider;
+
+        toast.info('Opening task wall...', {
+          title: 'Loading Task',
+          duration: 2000,
+        });
+        return;
+      }
+
       // Try proxy endpoint first untuk maximum in-app experience
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
       // Pastikan tidak ada double /api jika backendUrl sudah mengandung /api
@@ -1009,11 +1051,22 @@ export default function TasksPage() {
                     allow="camera; microphone; geolocation; accelerometer; gyroscope; magnetometer"
                     onLoad={(e) => {
                       try {
-                        // Check if iframe content is accessible (not blocked by X-Frame-Options)
                         const iframe = e.target;
+                        const iframeSrc = iframe.src || '';
+
+                        // For direct external provider iframes (cross-origin), 
+                        // we cannot access contentDocument - just mark as loaded
+                        const isExternalDirect = iframeSrc.startsWith('https://') && !iframeSrc.includes('/api/proxy/');
+
+                        if (isExternalDirect) {
+                          console.log('[Iframe] External provider loaded (cross-origin, skipping content check)');
+                          setIframeLoading(false);
+                          return;
+                        }
+
+                        // For proxy iframes (same-origin), check if content loaded properly
                         setTimeout(() => {
                           try {
-                            // Try to access iframe content
                             const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
                             if (!iframeDoc) {
                               throw new Error('Cannot access iframe content');
@@ -1021,7 +1074,6 @@ export default function TasksPage() {
                             setIframeLoading(false);
                             console.log('[Iframe] Loaded successfully');
                           } catch (err) {
-                            // Iframe is blocked by X-Frame-Options or CORS
                             console.warn('[Iframe] Blocked by provider:', err.message);
                             setIframeError(true);
                             setIframeLoading(false);

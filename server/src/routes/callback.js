@@ -12,10 +12,11 @@ import { monetagCallback } from '../controllers/monetagController.js';
 import { revlumCallback } from '../controllers/revlumController.js';
 import { getTheoremreachUrl, theoremreachCallback } from '../controllers/theoremreachController.js';
 import { timewallCallback } from '../controllers/timewallController.js';
+import { wannadsCallback } from '../controllers/wannadsController.js';
 
 // Import security middleware
 import { authenticate } from '../middleware/auth.js';
-import { cpxIpWhitelist, sanitizeInput, simpleRateLimit, verifyCpxHash } from '../middleware/security.js';
+import { cpxIpWhitelist, sanitizeInput, simpleRateLimit, verifyCpxHash, wannadsIpWhitelist } from '../middleware/security.js';
 
 /**
  * UNIFIED POSTBACK ROUTING SYSTEM
@@ -85,6 +86,12 @@ router.get('/kiwiwall/url', authenticate, getKiwiwallUrl);
 router.get('/kiwiwall/offers', authenticate, getKiwiwallOffers);
 
 // ============================================
+// WANNADS (Offers & Wall)
+// ============================================
+router.get('/wannads', sanitizeInput, wannadsIpWhitelist, wannadsCallback);
+router.post('/wannads', sanitizeInput, wannadsIpWhitelist, wannadsCallback);
+
+// ============================================
 // GENERIC (Template for new providers)
 // ============================================
 router.get('/generic', sanitizeInput, simpleRateLimit(500, 60000), genericCallback);
@@ -109,6 +116,7 @@ router.get('/health', (req, res) => {
       theoremreach: 'active',
       adgem: 'active',
       kiwiwall: 'active',
+      wannads: 'active',
     }
   });
 });

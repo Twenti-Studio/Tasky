@@ -49,6 +49,10 @@ router.get('/offerwall/:provider', async (req, res) => {
         targetUrl = `https://www.kiwiwall.com/wall/${process.env.KIWIWALL_APP_ID}/iframe?s1=${user_id}`;
         providerName = 'Kiwiwall';
         break;
+      case 'wannads':
+        targetUrl = `https://earn.wannads.com/wall?apiKey=${process.env.NEXT_PUBLIC_WANNADS_API_KEY}&userId=${user_id}`;
+        providerName = 'Wannads';
+        break;
       default:
         return res.status(404).json({ error: 'Provider not found' });
     }

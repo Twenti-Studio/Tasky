@@ -6,19 +6,19 @@ import crypto from 'crypto';
  */
 const cpxIpWhitelist = (req, res, next) => {
   const allowedIps = process.env.CPX_ALLOWED_IPS?.split(',') || [];
-  
+
   // Get real IP (considering proxies)
-  const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
-                   req.headers['x-real-ip'] || 
-                   req.connection.remoteAddress || 
-                   req.socket.remoteAddress;
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+    req.headers['x-real-ip'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress;
 
   console.log(`[CPX IP Check] Client IP: ${clientIp}`);
   console.log(`[CPX IP Check] Allowed IPs: ${allowedIps.join(', ')}`);
 
   // In development, allow localhost
-  if (process.env.NODE_ENV === 'development' && 
-      (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp?.includes('127.0.0.1'))) {
+  if (process.env.NODE_ENV === 'development' &&
+    (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp?.includes('127.0.0.1'))) {
     console.log('[CPX IP Check] Development mode - allowing localhost');
     return next();
   }
@@ -35,6 +35,43 @@ const cpxIpWhitelist = (req, res, next) => {
   }
 
   console.log('[CPX IP Check] IP authorized');
+  next();
+};
+
+/**
+ * IP Whitelisting Middleware for Wannads
+ * Only allow requests from Wannads' official server IPs
+ */
+const wannadsIpWhitelist = (req, res, next) => {
+  const allowedIps = ['3.22.177.178']; // Official Wannads IP
+
+  // Get real IP (considering proxies)
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+    req.headers['x-real-ip'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress;
+
+  console.log(`[WANNADS IP Check] Client IP: ${clientIp}`);
+
+  // In development, allow localhost
+  if (process.env.NODE_ENV === 'development' &&
+    (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp?.includes('127.0.0.1'))) {
+    console.log('[WANNADS IP Check] Development mode - allowing localhost');
+    return next();
+  }
+
+  // Check if IP is whitelisted
+  const isAllowed = allowedIps.some(allowedIp => {
+    return clientIp === allowedIp || clientIp?.includes(allowedIp);
+  });
+
+  if (!isAllowed) {
+    console.error(`[WANNADS IP Check] BLOCKED - Unauthorized IP: ${clientIp}`);
+    // Always return 200 to prevent provider retries
+    return res.status(200).send('OK');
+  }
+
+  console.log('[WANNADS IP Check] IP authorized');
   next();
 };
 
@@ -61,7 +98,7 @@ const verifyCpxHash = (req, res, next) => {
   // Build hash string according to CPX documentation
   // Format: trans_id-user_id-amount_local-amount_usd-currency_type-SECRET_KEY
   const hashString = `${trans_id}-${user_id}-${amount_local}-${amount_usd}-${currency_type}-${secretKey}`;
-  
+
   // Calculate MD5 hash
   const calculatedHash = crypto.createHash('md5').update(hashString).digest('hex');
 
@@ -87,29 +124,29 @@ const requestLog = new Map();
 
 const simpleRateLimit = (maxRequests = 100, windowMs = 60000) => {
   return (req, res, next) => {
-    const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
-                     req.connection.remoteAddress;
-    
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+      req.connection.remoteAddress;
+
     const now = Date.now();
     const key = `${clientIp}-${req.path}`;
-    
+
     if (!requestLog.has(key)) {
       requestLog.set(key, []);
     }
-    
+
     const requests = requestLog.get(key);
-    
+
     // Remove old requests outside the time window
     const validRequests = requests.filter(timestamp => now - timestamp < windowMs);
-    
+
     if (validRequests.length >= maxRequests) {
       console.warn(`[Rate Limit] ${clientIp} exceeded ${maxRequests} requests in ${windowMs}ms`);
       return res.status(429).json({ error: 'Too many requests' });
     }
-    
+
     validRequests.push(now);
     requestLog.set(key, validRequests);
-    
+
     next();
   };
 };
@@ -128,8 +165,6 @@ const sanitizeInput = (req, res, next) => {
 };
 
 export {
-  cpxIpWhitelist,
-  verifyCpxHash,
-  simpleRateLimit,
-  sanitizeInput,
+  cpxIpWhitelist, sanitizeInput, simpleRateLimit, verifyCpxHash, wannadsIpWhitelist
 };
+
